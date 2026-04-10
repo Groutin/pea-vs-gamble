@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PEA vs Casino</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #f5f0e8;
+  --bg2:       #ede8df;
+  --surface:   #faf7f2;
+  --border:    #e0d9ce;
+  --text:      #2c2620;
+  --muted:     #8a7e74;
+
+  --blue-bg:   #eaf3fa; --blue-brd:  #b8d4e8; --blue-txt:  #3a6a8a;
+  --green-bg:  #eaf5ee; --green-brd: #b8ddc8; --green-txt: #2e6b4a;
+  --peach-bg:  #fdf0e8; --peach-brd: #f0c8b0; --peach-txt: #8a4a28;
+  --lav-bg:    #f0eefa; --lav-brd:   #c8bce8; --lav-txt:   #4a3a7a;
+  --rose-bg:   #faeaf0; --rose-brd:  #e8b8cc; --rose-txt:  #7a2a48;
+  --red-bg:    #faeaea; --red-brd:   #e8b8b8; --red-txt:   #8a2a2a;
+
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans:  'DM Sans', sans-serif;
+  --r: 16px;
+}
+
+/* ── Keyframes ── */
+@keyframes fadeUp  { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
+@keyframes popIn   { 0%{opacity:0;transform:scale(.7);} 60%{transform:scale(1.06);} 80%{transform:scale(.97);} 100%{opacity:1;transform:scale(1);} }
+@keyframes bounceNum { 0%{transform:scale(1);} 30%{transform:scale(1.18) translateY(-3px);} 55%{transform:scale(.94) translateY(1px);} 75%{transform:scale(1.05);} 100%{transform:scale(1);} }
+@keyframes slideIn { from{opacity:0;transform:translateX(-16px);} to{opacity:1;transform:translateX(0);} }
+@keyframes rowFadeIn { from{opacity:0;transform:translateX(-8px);} to{opacity:1;transform:translateX(0);} }
+@keyframes spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+@keyframes spinBounce { 0%{transform:rotate(0deg);} 80%{transform:rotate(var(--spin-end,1440deg));} 90%{transform:rotate(calc(var(--spin-end,1440deg) - 8deg));} 95%{transform:rotate(calc(var(--spin-end,1440deg) + 4deg));} 100%{transform:rotate(var(--spin-end,1440deg));} }
+@keyframes resultPop { 0%{transform:scale(.5);opacity:0;} 60%{transform:scale(1.1);} 100%{transform:scale(1);opacity:1;} }
+@keyframes tabSlide { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+
+.bounce { animation: bounceNum .45s cubic-bezier(.36,.07,.19,.97) both; }
+
+body { font-family:var(--sans); background:var(--bg); color:var(--text); min-height:100vh; padding:40px 24px 80px; }
+.wrapper { max-width:900px; margin:0 auto; }
+
+/* ── Global header ── */
+.global-header { margin-bottom:36px; animation:fadeUp .6s ease both; }
+.global-tag {
+  display:inline-block; font-size:11px; font-weight:500; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--muted); border:1px solid var(--border); border-radius:99px;
+  padding:4px 14px; margin-bottom:14px; background:var(--surface);
+}
+.global-header h1 { font-family:var(--serif); font-size:clamp(28px,5vw,44px); font-weight:400; line-height:1.12; }
+.global-header h1 em { font-style:italic; color:var(--blue-txt); }
+.global-header p { margin-top:10px; font-size:15px; font-weight:300; color:var(--muted); line-height:1.6; }
+
+/* ── Tabs ── */
+.tabs { display:flex; gap:8px; margin-bottom:32px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:6px; width:fit-content; animation:popIn .5s .15s ease both; }
+.tab-btn {
+  font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer;
+  padding:9px 22px; border-radius:12px; border:none; background:transparent;
+  color:var(--muted); transition:all .22s cubic-bezier(.36,.07,.19,.97);
+}
+.tab-btn:hover { color:var(--text); background:var(--bg2); }
+.tab-btn.active { background:var(--bg); color:var(--text); border:1px solid var(--border); box-shadow:0 2px 8px rgba(0,0,0,.07); transform:scale(1.02); }
+
+.tab-content { display:none; animation:tabSlide .4s ease both; }
+.tab-content.active { display:block; }
+
+/* ── Shared card/panel styles ── */
+.cards { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:28px; }
+@media(max-width:580px){.cards{grid-template-columns:1fr 1fr;}}
+
+.card { border-radius:var(--r); padding:22px 20px 18px; border:1px solid transparent; transition:transform .2s cubic-bezier(.36,.07,.19,.97),box-shadow .2s; }
+.card:hover { transform:translateY(-3px) scale(1.015); box-shadow:0 8px 24px rgba(0,0,0,.07); }
+.card-blue  { background:var(--blue-bg);  border-color:var(--blue-brd);  animation:popIn .6s .3s ease both; }
+.card-green { background:var(--green-bg); border-color:var(--green-brd); animation:popIn .6s .42s ease both; }
+.card-peach { background:var(--peach-bg); border-color:var(--peach-brd); animation:popIn .6s .54s ease both; }
+.card-lav   { background:var(--lav-bg);   border-color:var(--lav-brd);   animation:popIn .6s .3s ease both; }
+.card-rose  { background:var(--rose-bg);  border-color:var(--rose-brd);  animation:popIn .6s .42s ease both; }
+.card-red   { background:var(--red-bg);   border-color:var(--red-brd);   animation:popIn .6s .54s ease both; }
+
+.card .lbl { font-size:10px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; margin-bottom:10px; }
+.card-blue  .lbl { color:var(--blue-txt); }
+.card-green .lbl { color:var(--green-txt); }
+.card-peach .lbl { color:var(--peach-txt); }
+.card-lav   .lbl { color:var(--lav-txt); }
+.card-rose  .lbl { color:var(--rose-txt); }
+.card-red   .lbl { color:var(--red-txt); }
+
+.card .num { font-family:var(--serif); font-size:clamp(20px,3vw,28px); line-height:1; display:inline-block; }
+.card-blue  .num { color:var(--blue-txt); }
+.card-green .num { color:var(--green-txt); }
+.card-peach .num { color:var(--peach-txt); }
+.card-lav   .num { color:var(--lav-txt); }
+.card-rose  .num { color:var(--rose-txt); }
+.card-red   .num { color:var(--red-txt); }
+.card .sub { margin-top:6px; font-size:12px; color:var(--muted); }
+
+.body-grid { display:grid; grid-template-columns:270px 1fr; gap:16px; align-items:start; }
+@media(max-width:680px){.body-grid{grid-template-columns:1fr;}}
+
+.panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:28px 22px; animation:slideIn .7s .35s ease both; }
+.panel-title { font-size:10px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:26px; }
+.sep { height:1px; background:var(--border); margin:18px 0; }
+
+/* ── Sliders ── */
+.ctrl { margin-bottom:22px; }
+.ctrl:last-child { margin-bottom:0; }
+.ctrl-row { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; }
+.ctrl-row label { font-size:13px; color:var(--text); }
+.ctrl-row .val { font-family:var(--serif); font-size:17px; display:inline-block; }
+.val.blue  { color:var(--blue-txt); }
+.val.green { color:var(--green-txt); }
+.val.peach { color:var(--peach-txt); }
+.val.lav   { color:var(--lav-txt); }
+.val.rose  { color:var(--rose-txt); }
+
+input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:3px; border-radius:99px; outline:none; cursor:pointer; border:none; transition:height .15s; }
+input[type=range]:hover { height:5px; }
+input[type=range].blue  { background:linear-gradient(to right,var(--blue-txt)  var(--p,12%),var(--border) var(--p,12%)); color:var(--blue-txt); }
+input[type=range].green { background:linear-gradient(to right,var(--green-txt) var(--p,1%), var(--border) var(--p,1%));  color:var(--green-txt); }
+input[type=range].peach { background:linear-gradient(to right,var(--peach-txt) var(--p,37%),var(--border) var(--p,37%)); color:var(--peach-txt); }
+input[type=range].lav   { background:linear-gradient(to right,var(--lav-txt)   var(--p,14%),var(--border) var(--p,14%)); color:var(--lav-txt); }
+input[type=range].rose  { background:linear-gradient(to right,var(--rose-txt)  var(--p,10%),var(--border) var(--p,10%)); color:var(--rose-txt); }
+
+input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:var(--surface); border:2.5px solid currentColor; box-shadow:0 2px 6px rgba(0,0,0,.12); transition:transform .18s cubic-bezier(.36,.07,.19,.97); }
+input[type=range]:hover::-webkit-slider-thumb { transform:scale(1.25); }
+input[type=range]::-moz-range-thumb { width:18px; height:18px; border-radius:50%; background:var(--surface); border:2.5px solid currentColor; }
+
+/* ── PEA chart ── */
+.chart-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.chart-title { font-size:13px; font-weight:500; }
+.legend { display:flex; gap:14px; }
+.legend span { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--muted); }
+.dot { width:8px; height:8px; border-radius:2px; flex-shrink:0; }
+.chart-wrap { position:relative; width:100%; height:280px; }
+
+.table-wrap { margin-top:16px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r); overflow:hidden; animation:fadeUp .7s .55s ease both; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+thead th { text-align:left; padding:13px 20px; font-size:10px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); background:var(--bg2); border-bottom:1px solid var(--border); }
+tbody tr { border-bottom:1px solid var(--border); transition:background .12s,transform .12s; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:var(--bg2); transform:translateX(3px); }
+tbody td { padding:12px 20px; font-variant-numeric:tabular-nums; }
+td.yr    { color:var(--muted); font-weight:500; }
+td.gain  { color:var(--green-txt); font-weight:500; }
+td.total { color:var(--blue-txt); font-weight:500; }
+td.loss  { color:var(--red-txt); font-weight:500; }
+.tr-anim { animation:rowFadeIn .3s ease both; }
+
+/* ── Casino specific ── */
+.casino-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:28px; }
+@media(max-width:680px){.casino-grid{grid-template-columns:1fr;}}
+
+/* Bet type selector */
+.bet-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:0; }
+.bet-btn {
+  font-family:var(--sans); font-size:12px; font-weight:500; cursor:pointer;
+  padding:10px 12px; border-radius:10px; border:1px solid var(--border);
+  background:var(--surface); color:var(--text);
+  transition:all .2s cubic-bezier(.36,.07,.19,.97);
+  text-align:left; line-height:1.3;
+}
+.bet-btn:hover { background:var(--bg2); transform:scale(1.02); }
+.bet-btn.active { background:var(--rose-bg); border-color:var(--rose-brd); color:var(--rose-txt); transform:scale(1.04); box-shadow:0 4px 12px rgba(122,42,72,.1); }
+.bet-btn .bet-name { display:block; font-weight:500; }
+.bet-btn .bet-sub  { display:block; font-size:10px; color:var(--muted); margin-top:2px; }
+.bet-btn.active .bet-sub { color:var(--rose-txt); opacity:.7; }
+
+/* Roulette wheel */
+.wheel-area { display:flex; flex-direction:column; align-items:center; gap:16px; }
+.wheel-outer { position:relative; width:200px; height:200px; cursor:pointer; user-select:none; }
+.wheel-canvas { width:200px; height:200px; border-radius:50%; }
+.wheel-needle { position:absolute; top:-10px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-top:20px solid var(--text); filter:drop-shadow(0 2px 3px rgba(0,0,0,.2)); z-index:10; }
+.spin-btn {
+  font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer;
+  padding:11px 28px; border-radius:99px; border:1.5px solid var(--rose-brd);
+  background:var(--rose-bg); color:var(--rose-txt);
+  transition:all .2s cubic-bezier(.36,.07,.19,.97);
+}
+.spin-btn:hover { background:var(--rose-brd); transform:scale(1.04); }
+.spin-btn:active { transform:scale(.97); }
+.spin-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+.result-badge {
+  font-family:var(--serif); font-size:28px; text-align:center;
+  min-height:48px; display:flex; align-items:center; justify-content:center;
+}
+.result-badge.win  { color:var(--green-txt); animation:resultPop .4s ease both; }
+.result-badge.lose { color:var(--red-txt);   animation:resultPop .4s ease both; }
+
+/* Simulation bar chart */
+.sim-section { margin-top:16px; }
+.sim-controls { display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+.sim-controls label { font-size:13px; color:var(--muted); }
+.sim-select {
+  font-family:var(--sans); font-size:13px; padding:7px 12px; border-radius:8px;
+  border:1px solid var(--border); background:var(--surface); color:var(--text); cursor:pointer;
+}
+.sim-run-btn {
+  font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer;
+  padding:8px 18px; border-radius:99px; border:1.5px solid var(--lav-brd);
+  background:var(--lav-bg); color:var(--lav-txt);
+  transition:all .2s ease;
+}
+.sim-run-btn:hover { background:var(--lav-brd); transform:scale(1.03); }
+
+/* Proba table */
+.proba-table { width:100%; border-collapse:collapse; font-size:13px; }
+.proba-table th { text-align:left; padding:11px 14px; font-size:10px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); background:var(--bg2); border-bottom:1px solid var(--border); }
+.proba-table td { padding:10px 14px; border-bottom:1px solid var(--border); font-variant-numeric:tabular-nums; }
+.proba-table tr:last-child td { border-bottom:none; }
+.proba-table tr:hover td { background:var(--bg2); }
+.proba-table td.active-row { color:var(--rose-txt); font-weight:500; }
+.proba-bar-wrap { width:80px; height:6px; background:var(--border); border-radius:99px; overflow:hidden; display:inline-block; vertical-align:middle; margin-left:6px; }
+.proba-bar { height:100%; background:var(--rose-brd); border-radius:99px; transition:width .4s ease; }
+
+/* House edge warning */
+.edge-note { margin-top:12px; padding:12px 16px; background:var(--peach-bg); border:1px solid var(--peach-brd); border-radius:10px; font-size:12px; color:var(--peach-txt); line-height:1.6; }
+
+footer { margin-top:48px; text-align:center; font-size:12px; color:var(--muted); animation:fadeUp .7s .7s ease both; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="global-header">
+    <div class="global-tag">Simulateur financier</div>
+    <h1>Placer intelligemment<br>ou <em>all-in au casino</em> ?</h1>
+    <p>Placer son argent passivement dans le temps tel une poule mouillée ou être un chad et all in sur le rouge ?.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('pea')">📈 PEA — Intérêts composés</button>
+    <button class="tab-btn"       onclick="switchTab('casino')">🎰 Casino — Roulette</button>
+  </div>
+
+  <!-- ═══════════════ TAB PEA ═══════════════ -->
+  <div id="tab-pea" class="tab-content active">
+
+    <div class="cards">
+      <div class="card card-blue">
+        <div class="lbl">Capital final</div>
+        <div class="num" id="total">—</div>
+        <div class="sub">dans <span id="yearsLbl">5</span> ans</div>
+      </div>
+      <div class="card card-green">
+        <div class="lbl">Gain généré</div>
+        <div class="num" id="gain">—</div>
+        <div class="sub" id="gainPct">—</div>
+      </div>
+      <div class="card card-peach">
+        <div class="lbl">Somme investie</div>
+        <div class="num" id="invested">—</div>
+        <div class="sub">capital + versements</div>
+      </div>
+    </div>
+
+    <div class="body-grid">
+      <div class="panel">
+        <div class="panel-title">Paramètres</div>
+        <div class="ctrl">
+          <div class="ctrl-row"><label>Capital initial</label><span class="val blue" id="capitalVal">10 000 €</span></div>
+          <input type="range" class="blue" id="capital" min="0" max="300000" step="1000" value="10000">
+        </div>
+        <div class="sep"></div>
+        <div class="ctrl">
+          <div class="ctrl-row"><label>Versement mensuel</label><span class="val green" id="monthlyVal">100 €</span></div>
+          <input type="range" class="green" id="monthly" min="0" max="10000" step="50" value="100">
+        </div>
+        <div class="sep"></div>
+        <div class="ctrl">
+          <div class="ctrl-row"><label>Rendement annuel</label><span class="val peach" id="rateVal">8,0 %</span></div>
+          <input type="range" class="peach" id="rate" min="1" max="20" step="0.5" value="8">
+        </div>
+        <div class="sep"></div>
+        <div class="ctrl">
+          <div class="ctrl-row"><label>Durée</label><span class="val lav" id="yearsVal">5 ans</span></div>
+          <input type="range" class="lav" id="years" min="1" max="30" step="1" value="5">
+        </div>
+      </div>
+
+      <div class="panel" style="animation-delay:.45s">
+        <div class="chart-top">
+          <span class="chart-title">Évolution du capital</span>
+          <div class="legend">
+            <span><span class="dot" style="background:#b8d4e8"></span>Investi</span>
+            <span><span class="dot" style="background:#b8ddc8"></span>Intérêts</span>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="peaChart" role="img" aria-label="Évolution annuelle PEA"></canvas></div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Année</th><th>Capital investi</th><th>Intérêts cumulés</th><th>Capital total</th></tr></thead>
+        <tbody id="peaTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TAB CASINO ═══════════════ -->
+  <div id="tab-casino" class="tab-content">
+
+    <div class="cards" style="grid-template-columns:repeat(3,1fr)">
+      <div class="card card-lav">
+        <div class="lbl">Probabilité de gain</div>
+        <div class="num" id="c-prob">—</div>
+        <div class="sub" id="c-prob-sub">—</div>
+      </div>
+      <div class="card card-rose">
+        <div class="lbl">Gain si victoire</div>
+        <div class="num" id="c-win">—</div>
+        <div class="sub" id="c-win-sub">—</div>
+      </div>
+      <div class="card card-red">
+        <div class="lbl">Espérance par mise</div>
+        <div class="num" id="c-ev">—</div>
+        <div class="sub">avantage casino : 2,7 %</div>
+      </div>
+    </div>
+
+    <div class="casino-grid">
+
+      <!-- Left: wheel + bet controls -->
+      <div class="panel" style="animation-delay:.35s">
+        <div class="panel-title">Mise & type de pari</div>
+
+        <div class="ctrl">
+          <div class="ctrl-row"><label>Mise</label><span class="val rose" id="stakeVal">50 €</span></div>
+          <input type="range" class="rose" id="stake" min="1" max="500" step="1" value="50">
+        </div>
+        <div class="sep"></div>
+
+        <div class="panel-title" style="margin-bottom:12px">Type de pari</div>
+        <div class="bet-grid" id="betGrid"></div>
+
+        <div class="sep"></div>
+        <div class="wheel-area">
+          <div class="wheel-outer" id="wheelOuter">
+            <div class="wheel-needle"></div>
+            <canvas class="wheel-canvas" id="wheelCanvas" width="200" height="200"></canvas>
+          </div>
+          <div class="result-badge" id="resultBadge">Cliquez pour faire tourner</div>
+          <button class="spin-btn" id="spinBtn" onclick="spinWheel()">🎰 Lancer la roulette</button>
+        </div>
+      </div>
+
+      <!-- Right: probability table + simulation -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="panel" style="animation-delay:.45s;padding:20px;">
+          <div class="panel-title">Probabilités — Roulette européenne (37 cases)</div>
+          <table class="proba-table" id="probaTable"></table>
+        </div>
+
+        <div class="panel sim-section" style="animation-delay:.55s;padding:20px;">
+          <div class="panel-title">Simulation sur N parties</div>
+          <div class="sim-controls">
+            <label>Nombre de parties :</label>
+            <select class="sim-select" id="simN" onchange="runSimulation()">
+              <option value="10">10</option>
+              <option value="50">50</option>
+              <option value="100" selected>100</option>
+              <option value="500">500</option>
+              <option value="1000">1 000</option>
+            </select>
+            <button class="sim-run-btn" onclick="runSimulation()">↻ Rejouer</button>
+          </div>
+          <div class="chart-wrap" style="height:200px"><canvas id="simChart" role="img" aria-label="Simulation roulette"></canvas></div>
+          <div class="edge-note" id="simNote"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Simulation indicative — ne constitue pas un conseil en investissement ou une incitation aux jeux d'argent.</footer>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════ */
+const fmtE = v => Math.round(v).toLocaleString('fr-FR') + '\u202f€';
+const fmtK = v => v >= 1e6
+  ? (v/1e6).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '\u202fM€'
+  : Math.round(v).toLocaleString('fr-FR') + '\u202f€';
+const fmtPct = v => v.toFixed(2).replace('.',',') + '\u202f%';
+
+function triggerBounce(el) { el.classList.remove('bounce'); void el.offsetWidth; el.classList.add('bounce'); }
+
+function refreshSlider(el) {
+  const pct = ((+el.value - +el.min) / (+el.max - +el.min) * 100).toFixed(2) + '%';
+  el.style.setProperty('--p', pct);
+}
+
+function animateValue(el, newVal, fmt) {
+  const old = el.dataset.raw != null ? +el.dataset.raw : null;
+  el.dataset.raw = newVal;
+  if (old === null) { el.textContent = fmt(newVal); return; }
+  const dur=400, t0=performance.now();
+  const ease = t => t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+  (function step(now){
+    const f=Math.min((now-t0)/dur,1);
+    el.textContent=fmt(old+(newVal-old)*ease(f));
+    if(f<1) requestAnimationFrame(step); else el.textContent=fmt(newVal);
+  })(t0);
+  triggerBounce(el);
+}
+
+/* ═══════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════ */
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (name === 'casino') { drawWheel(); buildProbaTable(); runSimulation(); }
+}
+
+/* ═══════════════════════════════════════════
+   PEA SIMULATOR
+═══════════════════════════════════════════ */
+let peaChart;
+
+function computePEA() {
+  const cap  = +document.getElementById('capital').value;
+  const mo   = +document.getElementById('monthly').value;
+  const rate = +document.getElementById('rate').value / 100;
+  const yrs  = +document.getElementById('years').value;
+  const r    = rate / 12;
+  const labels=[], inv=[], gn=[], tot=[];
+  for(let y=0;y<=yrs;y++){
+    const n=y*12;
+    const fv=n===0?cap:cap*Math.pow(1+r,n)+(r>0?mo*(Math.pow(1+r,n)-1)/r:mo*n);
+    const i=cap+mo*n;
+    labels.push('An\u00a0'+y); inv.push(Math.round(i)); gn.push(Math.max(0,Math.round(fv-i))); tot.push(Math.round(fv));
+  }
+  const fv=tot[yrs],fi=inv[yrs],fg=gn[yrs];
+  const gp=((fg/fi)*100).toFixed(1).replace('.',',');
+  animateValue(document.getElementById('total'),fv,fmtK);
+  animateValue(document.getElementById('gain'),fg,fmtK);
+  animateValue(document.getElementById('invested'),fi,fmtK);
+  document.getElementById('gainPct').textContent='+'+gp+'\u00a0% sur le capital';
+  document.getElementById('yearsLbl').textContent=yrs;
+  if(peaChart){
+    peaChart.data.labels=labels; peaChart.data.datasets[0].data=inv; peaChart.data.datasets[1].data=gn; peaChart.update();
+  } else {
+    peaChart=new Chart(document.getElementById('peaChart'),{
+      type:'bar',
+      data:{labels,datasets:[
+        {label:'Capital investi',data:inv,backgroundColor:'#b8d4e8',stack:'s',borderRadius:5,borderSkipped:false},
+        {label:'Intérêts',data:gn,backgroundColor:'#b8ddc8',stack:'s',borderRadius:5,borderSkipped:'bottom'}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,animation:{duration:500,easing:'easeOutBack'},
+        plugins:{legend:{display:false},tooltip:{backgroundColor:'#faf7f2',borderColor:'#e0d9ce',borderWidth:1,titleColor:'#2c2620',bodyColor:'#8a7e74',padding:12,
+          callbacks:{label:c=>' '+c.dataset.label+' : '+Math.round(c.raw).toLocaleString('fr-FR')+' €'}}},
+        scales:{
+          x:{stacked:true,ticks:{color:'#8a7e74',font:{family:'DM Sans',size:11},autoSkip:false},grid:{display:false},border:{color:'#e0d9ce'}},
+          y:{stacked:true,ticks:{color:'#8a7e74',font:{family:'DM Sans',size:11},callback:v=>v>=1e6?(v/1e6).toFixed(1)+' M€':(v/1000).toFixed(0)+'k €'},grid:{color:'#ede8df'},border:{display:false}}
+        }
+      }
+    });
+  }
+  const tb=document.getElementById('peaTbody'); tb.innerHTML='';
+  for(let y=1;y<=yrs;y++){
+    const tr=document.createElement('tr'); tr.className='tr-anim'; tr.style.animationDelay=(y*40)+'ms';
+    tr.innerHTML=`<td class="yr">Année ${y}</td><td>${fmtE(inv[y])}</td><td class="gain">+ ${fmtE(gn[y])}</td><td class="total">${fmtE(tot[y])}</td>`;
+    tb.appendChild(tr);
+  }
+}
+
+[{id:'capital',out:'capitalVal',fmt:v=>Math.round(v).toLocaleString('fr-FR')+'\u202f€'},
+ {id:'monthly',out:'monthlyVal',fmt:v=>Math.round(v).toLocaleString('fr-FR')+'\u202f€'},
+ {id:'rate',   out:'rateVal',   fmt:v=>parseFloat(v).toFixed(1).replace('.',',')+'\u202f%'},
+ {id:'years',  out:'yearsVal',  fmt:v=>v+(+v>1?' ans':' an')}
+].forEach(({id,out,fmt})=>{
+  const el=document.getElementById(id);
+  refreshSlider(el);
+  el.addEventListener('input',()=>{
+    const vEl=document.getElementById(out); vEl.textContent=fmt(el.value); triggerBounce(vEl); refreshSlider(el); computePEA();
+  });
+});
+
+computePEA();
+
+/* ═══════════════════════════════════════════
+   CASINO — ROULETTE DATA
+═══════════════════════════════════════════ */
+// European roulette: 37 numbers (0-36), house edge 2.7%
+const BETS = [
+  { id:'straight', name:'Numéro plein',   sub:'1 numéro',      count:1,  payout:35 },
+  { id:'split',    name:'Cheval',          sub:'2 numéros',     count:2,  payout:17 },
+  { id:'street',   name:'Transversale',   sub:'3 numéros',     count:3,  payout:11 },
+  { id:'corner',   name:'Carré',           sub:'4 numéros',     count:4,  payout:8  },
+  { id:'sixline',  name:'Sixain',          sub:'6 numéros',     count:6,  payout:5  },
+  { id:'dozen',    name:'Douzaine',        sub:'12 numéros',    count:12, payout:2  },
+  { id:'redblack', name:'Rouge / Noir',    sub:'18 numéros',    count:18, payout:1  },
+  { id:'oddeven',  name:'Pair / Impair',   sub:'18 numéros',    count:18, payout:1  },
+];
+
+let currentBet = BETS[6]; // Rouge/Noir by default
+
+// Roulette numbers in wheel order (European)
+const WHEEL_NUMS = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+const RED_NUMS   = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+
+function numColor(n) {
+  if(n===0) return '#7ec4a0'; // green for 0
+  return RED_NUMS.has(n) ? '#e8b8b8' : '#c8c0bc';
+}
+
+/* Build bet buttons */
+function buildBetButtons() {
+  const grid = document.getElementById('betGrid');
+  grid.innerHTML = '';
+  BETS.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'bet-btn' + (b.id === currentBet.id ? ' active' : '');
+    btn.innerHTML = `<span class="bet-name">${b.name}</span><span class="bet-sub">${b.sub} · x${b.payout}</span>`;
+    btn.onclick = () => { currentBet = b; buildBetButtons(); buildProbaTable(); updateCasinoCards(); };
+    grid.appendChild(btn);
+  });
+}
+
+/* Update casino summary cards */
+function updateCasinoCards() {
+  const stake = +document.getElementById('stake').value;
+  const prob  = currentBet.count / 37;
+  const winNet = stake * currentBet.payout;
+  const ev    = prob * winNet - (1 - prob) * stake; // expected value per spin
+
+  animateValue(document.getElementById('c-prob'), prob * 100, v => v.toFixed(2).replace('.',',')+'\u202f%');
+  document.getElementById('c-prob-sub').textContent = currentBet.count + ' chance' + (currentBet.count>1?'s':'') + ' sur 37';
+  animateValue(document.getElementById('c-win'), winNet, fmtE);
+  document.getElementById('c-win-sub').textContent = 'mise de ' + fmtE(stake);
+  animateValue(document.getElementById('c-ev'), ev, v => (v>=0?'+':'')+Math.round(v).toLocaleString('fr-FR')+'\u202f€');
+}
+
+/* Build probability table */
+function buildProbaTable() {
+  const stake = +document.getElementById('stake').value;
+  const tbl = document.getElementById('probaTable');
+  tbl.innerHTML = `<thead><tr>
+    <th>Pari</th><th>Prob.</th><th>Gain net</th><th>Espérance</th>
+  </tr></thead>`;
+  const tb = document.createElement('tbody');
+  BETS.forEach(b => {
+    const prob = b.count / 37;
+    const win  = stake * b.payout;
+    const ev   = prob * win - (1-prob)*stake;
+    const tr = document.createElement('tr');
+    const isActive = b.id === currentBet.id;
+    const cls = isActive ? ' class="active-row"' : '';
+    tr.innerHTML =
+      `<td${cls}>${b.name}<br><span style="font-size:11px;color:var(--muted)">${b.sub}</span></td>` +
+      `<td${cls}>${fmtPct(prob*100)}<span class="proba-bar-wrap"><span class="proba-bar" style="width:${(prob*100).toFixed(1)}%"></span></span></td>` +
+      `<td${cls}>+ ${fmtE(win)}</td>` +
+      `<td${cls} style="color:${ev>=0?'var(--green-txt)':'var(--red-txt)'}">${(ev>=0?'+':'')}${fmtE(ev)}</td>`;
+    tb.appendChild(tr);
+  });
+  tbl.appendChild(tb);
+}
+
+/* Draw roulette wheel */
+let wheelAngle = 0;
+function drawWheel(highlightNum = null) {
+  const canvas = document.getElementById('wheelCanvas');
+  const ctx = canvas.getContext('2d');
+  const cx = 100, cy = 100, r = 96, inner = 60;
+  const N = WHEEL_NUMS.length;
+  const sliceAngle = (2*Math.PI) / N;
+  ctx.clearRect(0,0,200,200);
+
+  // Outer ring
+  ctx.beginPath(); ctx.arc(cx,cy,r+2,0,Math.PI*2);
+  ctx.fillStyle='#e0d9ce'; ctx.fill();
+
+  WHEEL_NUMS.forEach((num, i) => {
+    const startA = wheelAngle + i*sliceAngle - Math.PI/2;
+    const endA   = startA + sliceAngle;
+    const isHL   = num === highlightNum;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,startA,endA);
+    ctx.closePath();
+    ctx.fillStyle = isHL ? '#faf7f2' : numColor(num);
+    ctx.fill();
+    ctx.strokeStyle = '#faf7f2'; ctx.lineWidth = 1; ctx.stroke();
+
+    // Number text
+    const midA = startA + sliceAngle/2;
+    const tx = cx + (r-14) * Math.cos(midA);
+    const ty = cy + (r-14) * Math.sin(midA);
+    ctx.save(); ctx.translate(tx,ty); ctx.rotate(midA + Math.PI/2);
+    ctx.fillStyle = isHL ? '#2c2620' : (num===0?'#2e6b4a':'#4a3a3a');
+    ctx.font = `${isHL?'bold ':''} 7px DM Sans`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(num, 0, 0); ctx.restore();
+  });
+
+  // Inner circle
+  ctx.beginPath(); ctx.arc(cx,cy,inner,0,Math.PI*2);
+  ctx.fillStyle='#faf7f2'; ctx.fill();
+  ctx.strokeStyle='#e0d9ce'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.fillStyle='#8a7e74'; ctx.font='11px DM Sans'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('🎰', cx, cy);
+}
+
+/* Spin animation */
+let isSpinning = false;
+function spinWheel() {
+  if(isSpinning) return;
+  isSpinning = true;
+  document.getElementById('spinBtn').disabled = true;
+  document.getElementById('resultBadge').textContent = '…';
+  document.getElementById('resultBadge').className = 'result-badge';
+
+  const totalSpins = 5 + Math.random()*4; // 5-9 full rotations
+  const extraAngle = Math.random() * Math.PI*2;
+  const totalAngle = totalSpins * Math.PI*2 + extraAngle;
+  const dur = 3000;
+  const t0 = performance.now();
+  const startAngle = wheelAngle;
+
+  // Pick random result number
+  const idx = Math.floor(Math.random() * 37);
+  const resultNum = WHEEL_NUMS[idx];
+
+  function ease(t) { return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2; }
+
+  function frame(now) {
+    const f = Math.min((now-t0)/dur, 1);
+    wheelAngle = startAngle + totalAngle * ease(f);
+    drawWheel(f > .85 ? resultNum : null);
+    if(f < 1) { requestAnimationFrame(frame); return; }
+    // Final result
+    wheelAngle = startAngle + totalAngle;
+    isSpinning = false;
+    document.getElementById('spinBtn').disabled = false;
+    showSpinResult(resultNum);
+  }
+  requestAnimationFrame(frame);
+}
+
+function showSpinResult(num) {
+  const stake  = +document.getElementById('stake').value;
+  const isRed  = RED_NUMS.has(num);
+  const isBlack= num !== 0 && !isRed;
+  let won = false;
+  const b = currentBet;
+
+  if(b.id==='straight') won = true; // simplified: any hit counts for demo
+  else if(b.id==='redblack') won = isRed || isBlack; // both colours count as possible win
+  else if(b.id==='oddeven')  won = num !== 0 && num%2===0 || num%2===1;
+  else { won = num !== 0 && Math.random() < (b.count/36); } // probabilistic for others
+
+  // Use real probability for all
+  won = num !== 0 && Math.random() < (b.count/37);
+
+  const badge = document.getElementById('resultBadge');
+  if(won) {
+    const gain = stake * b.payout;
+    badge.textContent = `Numéro ${num} — Gagné ! +${fmtE(gain)}`;
+    badge.className = 'result-badge win';
+  } else {
+    badge.textContent = `Numéro ${num} — Perdu. −${fmtE(stake)}`;
+    badge.className = 'result-badge lose';
+  }
+  drawWheel(num);
+}
+
+/* Simulation */
+let simChart;
+function runSimulation() {
+  const n      = +document.getElementById('simN').value;
+  const stake  = +document.getElementById('stake').value;
+  const prob   = currentBet.count / 37;
+  const payout = currentBet.payout;
+
+  let bankroll = 0;
+  const data = [0];
+  let wins = 0;
+  for(let i=0;i<n;i++){
+    if(Math.random() < prob) { bankroll += stake*payout; wins++; }
+    else { bankroll -= stake; }
+    data.push(Math.round(bankroll));
+  }
+
+  const labels = Array.from({length:n+1},(_,i)=>i===0?'Départ':String(i));
+  const finalEV = -(stake * (1/37) * n); // theoretical
+  const color = bankroll >= 0 ? '#b8ddc8' : '#e8b8b8';
+  const borderColor = bankroll >= 0 ? '#2e6b4a' : '#8a2a2a';
+
+  if(simChart){
+    simChart.data.labels=labels; simChart.data.datasets[0].data=data;
+    simChart.data.datasets[0].backgroundColor=color; simChart.data.datasets[0].borderColor=borderColor;
+    simChart.update('none');
+  } else {
+    simChart=new Chart(document.getElementById('simChart'),{
+      type:'line',
+      data:{labels,datasets:[{label:'Bilan',data,fill:true,backgroundColor:color,borderColor:borderColor,borderWidth:1.5,pointRadius:0,tension:.3}]},
+      options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},
+        plugins:{legend:{display:false},tooltip:{backgroundColor:'#faf7f2',borderColor:'#e0d9ce',borderWidth:1,titleColor:'#2c2620',bodyColor:'#8a7e74',
+          callbacks:{label:c=>' Bilan : '+Math.round(c.raw).toLocaleString('fr-FR')+' €'}}},
+        scales:{
+          x:{ticks:{color:'#8a7e74',font:{size:10},maxTicksLimit:8},grid:{display:false},border:{color:'#e0d9ce'}},
+          y:{ticks:{color:'#8a7e74',font:{size:10},callback:v=>v.toLocaleString('fr-FR')+' €'},grid:{color:'#ede8df'},border:{display:false}}
+        }
+      }
+    });
+  }
+
+  const lossRate = ((wins/n)*100).toFixed(1);
+  document.getElementById('simNote').innerHTML =
+    `Sur ${n} parties : <strong>${wins} victoires (${lossRate}%)</strong> · Bilan réel : <strong style="color:${bankroll>=0?'var(--green-txt)':'var(--red-txt)'}">${bankroll>=0?'+':''}${fmtE(bankroll)}</strong> · Espérance théorique : <strong style="color:var(--peach-txt)">${fmtE(Math.round(finalEV))}</strong> — La maison gagne toujours sur le long terme.`;
+}
+
+/* Casino slider */
+const stakeEl = document.getElementById('stake');
+refreshSlider(stakeEl);
+stakeEl.addEventListener('input', () => {
+  const vEl = document.getElementById('stakeVal');
+  vEl.textContent = Math.round(stakeEl.value).toLocaleString('fr-FR') + '\u202f€';
+  triggerBounce(vEl);
+  refreshSlider(stakeEl);
+  updateCasinoCards();
+  buildProbaTable();
+});
+
+/* Init */
+buildBetButtons();
+updateCasinoCards();
+drawWheel();
+</script>
+</body>
+</html>
