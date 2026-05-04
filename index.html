@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PEA vs Casino</title>
+<title>PEA vs Immobilier vs Casino</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -28,6 +28,11 @@
   --serif: 'Instrument Serif', Georgia, serif;
   --sans:  'DM Sans', sans-serif;
   --r: 16px;
+
+  --amber-bg:  #fdf5e6; --amber-brd: #f0d090; --amber-txt: #7a5200;
+  --teal-bg:   #e6f5f5; --teal-brd:  #90d0d0; --teal-txt:  #1a6060;
+  --slate-bg:  #eef0f4; --slate-brd: #c0c8d8; --slate-txt: #3a4560;
+  --orange-bg: #fdf0e6; --orange-brd:#f0c090; --orange-txt:#7a3a00;
 }
 
 /* ── Keyframes ── */
@@ -43,22 +48,23 @@
 
 .bounce { animation: bounceNum .45s cubic-bezier(.36,.07,.19,.97) both; }
 
-body { font-family:var(--sans); background:var(--bg); color:var(--text); min-height:100vh; padding:40px 24px 80px; }
-.wrapper { max-width:900px; margin:0 auto; }
+body { font-family:var(--sans); background:var(--bg); color:var(--text); min-height:100vh; padding:20px 20px 20px; }
+.wrapper { max-width:1200px; margin:0 auto; }
 
 /* ── Global header ── */
-.global-header { margin-bottom:36px; animation:fadeUp .6s ease both; }
+.global-header { margin-bottom:16px; animation:fadeUp .6s ease both; }
 .global-tag {
   display:inline-block; font-size:11px; font-weight:500; letter-spacing:.12em; text-transform:uppercase;
   color:var(--muted); border:1px solid var(--border); border-radius:99px;
   padding:4px 14px; margin-bottom:14px; background:var(--surface);
 }
-.global-header h1 { font-family:var(--serif); font-size:clamp(28px,5vw,44px); font-weight:400; line-height:1.12; }
+.global-header h1 { font-family:var(--serif); font-size:clamp(22px,3.5vw,32px); font-weight:400; line-height:1.12; }
 .global-header h1 em { font-style:italic; color:var(--blue-txt); }
-.global-header p { margin-top:10px; font-size:15px; font-weight:300; color:var(--muted); line-height:1.6; }
+.global-header p { margin-top:6px; font-size:13px; font-weight:300; color:var(--muted); line-height:1.5; }
+.global-tag { display:none; } /* hide tag on immo for space */
 
 /* ── Tabs ── */
-.tabs { display:flex; gap:8px; margin-bottom:32px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:6px; width:fit-content; animation:popIn .5s .15s ease both; }
+.tabs { display:flex; gap:8px; margin-bottom:12px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:5px; width:fit-content; animation:popIn .5s .15s ease both; }
 .tab-btn {
   font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer;
   padding:9px 22px; border-radius:12px; border:none; background:transparent;
@@ -223,6 +229,127 @@ td.loss  { color:var(--red-txt); font-weight:500; }
 .edge-note { margin-top:12px; padding:12px 16px; background:var(--peach-bg); border:1px solid var(--peach-brd); border-radius:10px; font-size:12px; color:var(--peach-txt); line-height:1.6; }
 
 footer { margin-top:48px; text-align:center; font-size:12px; color:var(--muted); animation:fadeUp .7s .7s ease both; }
+
+/* ── Immo specific ── */
+.card-amber  { background:var(--amber-bg);  border-color:var(--amber-brd);  animation:popIn .6s .3s ease both; }
+.card-teal   { background:var(--teal-bg);   border-color:var(--teal-brd);   animation:popIn .6s .42s ease both; }
+.card-slate  { background:var(--slate-bg);  border-color:var(--slate-brd);  animation:popIn .6s .54s ease both; }
+.card-orange { background:var(--orange-bg); border-color:var(--orange-brd); animation:popIn .6s .66s ease both; }
+.card-amber  .lbl { color:var(--amber-txt); } .card-amber  .num { color:var(--amber-txt); }
+.card-teal   .lbl { color:var(--teal-txt);  } .card-teal   .num { color:var(--teal-txt); }
+.card-slate  .lbl { color:var(--slate-txt); } .card-slate  .num { color:var(--slate-txt); }
+.card-orange .lbl { color:var(--orange-txt);} .card-orange .num { color:var(--orange-txt); }
+
+.val.amber  { color:var(--amber-txt); }
+.val.teal   { color:var(--teal-txt); }
+.val.slate  { color:var(--slate-txt); }
+.val.orange { color:var(--orange-txt); }
+
+input[type=range].amber  { background:linear-gradient(to right,var(--amber-txt)  var(--p,50%),var(--border) var(--p,50%)); color:var(--amber-txt); }
+input[type=range].teal   { background:linear-gradient(to right,var(--teal-txt)   var(--p,50%),var(--border) var(--p,50%)); color:var(--teal-txt); }
+input[type=range].slate  { background:linear-gradient(to right,var(--slate-txt)  var(--p,50%),var(--border) var(--p,50%)); color:var(--slate-txt); }
+input[type=range].orange { background:linear-gradient(to right,var(--orange-txt) var(--p,50%),var(--border) var(--p,50%)); color:var(--orange-txt); }
+
+/* ── Immo compact layout ── */
+.immo-layout {
+  display: grid;
+  grid-template-columns: 480px 1fr;
+  gap: 12px;
+  height: calc(100vh - 210px);
+  min-height: 520px;
+}
+
+.immo-params {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.immo-col-sliders {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 10px 12px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.immo-chart-col {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.immo-chart-col canvas {
+  flex: 1;
+  min-height: 0;
+  width: 100% !important;
+}
+
+/* compact slider row */
+.ps { margin-bottom: 7px; }
+.ps-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.ps-row .val { font-size: 11px; font-weight: 600; }
+.ps input[type=range] { width: 100%; height: 3px; }
+
+.ps-head {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  padding: 5px 0 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.ps-head.immo-col { color: var(--amber-txt); border-color: var(--amber-brd); }
+.ps-head.pea-col  { color: var(--green-txt); border-color: var(--green-brd); }
+
+/* mini stats inside panel */
+.mini-stats {
+  font-size: 11.5px;
+  line-height: 1.8;
+  color: var(--text);
+  margin-top: 4px;
+}
+.mini-stats b { font-weight: 600; }
+.mini-stats .ms-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding: 3px 0; }
+.mini-stats .ms-row:last-child { border-bottom: none; }
+.ms-label { color: var(--muted); }
+.ms-val-immo { color: var(--amber-txt); font-weight: 600; }
+.ms-val-pea  { color: var(--green-txt); font-weight: 600; }
+
+.crossing-banner {
+  margin-bottom: 8px; padding: 8px 16px; border-radius: 10px;
+  background: var(--green-bg); border: 1px solid var(--green-brd);
+  font-size: 13px; color: var(--green-txt); font-weight: 500; text-align: center;
+  display: none;
+}
+.crossing-banner.show  { display: block; animation: popIn .5s ease both; }
+.crossing-banner.never { background: var(--red-bg); border-color: var(--red-brd); color: var(--red-txt); }
+
+td.immo-val { color: var(--amber-txt); font-weight: 500; }
+td.pea-val  { color: var(--green-txt); font-weight: 500; }
+td.winner   { font-weight: 700; }
+td.winner-immo { color: var(--amber-txt); }
+td.winner-pea  { color: var(--green-txt); }
+
+@media(max-width:820px) {
+  .immo-layout { grid-template-columns: 1fr; height: auto; }
+  .immo-params { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -236,6 +363,7 @@ footer { margin-top:48px; text-align:center; font-size:12px; color:var(--muted);
 
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('pea')">📈 PEA — Intérêts composés</button>
+    <button class="tab-btn"       onclick="switchTab('immo')">🏠 Immobilier vs PEA</button>
     <button class="tab-btn"       onclick="switchTab('casino')">🎰 Casino — Roulette</button>
   </div>
 
@@ -301,6 +429,108 @@ footer { margin-top:48px; text-align:center; font-size:12px; color:var(--muted);
         <thead><tr><th>Année</th><th>Capital investi</th><th>Intérêts cumulés</th><th>Capital total</th></tr></thead>
         <tbody id="peaTbody"></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TAB IMMO ═══════════════ -->
+  <div id="tab-immo" class="tab-content">
+
+    <!-- Crossing banner -->
+    <div class="crossing-banner" id="imCrossingBanner"></div>
+
+    <div class="immo-layout">
+
+      <!-- ── LEFT : two columns of sliders ── -->
+      <div class="immo-params">
+
+        <!-- col A : immobilier -->
+        <div class="immo-col-sliders">
+          <div class="ps-head immo-col">🏠 Immobilier</div>
+
+          <div class="ps">
+            <div class="ps-row"><span>Prix du bien</span><span class="val amber" id="im-prixVal">200 000 €</span></div>
+            <input type="range" class="amber" id="im-prix" min="50000" max="1000000" step="5000" value="200000">
+          </div>
+          <div class="ps">
+            <div class="ps-row"><span>Apport</span><span class="val amber" id="im-apportVal">20 000 €</span></div>
+            <input type="range" class="amber" id="im-apport" min="0" max="200000" step="1000" value="20000">
+          </div>
+          <div class="ps">
+            <div class="ps-row"><span>Durée crédit</span><span class="val amber" id="im-dureeVal">20 ans</span></div>
+            <input type="range" class="amber" id="im-duree" min="5" max="30" step="1" value="20">
+          </div>
+          <div class="ps">
+            <div class="ps-row"><span>Taux crédit</span><span class="val amber" id="im-txcreditVal">3,5 %</span></div>
+            <input type="range" class="amber" id="im-txcredit" min="0.5" max="8" step="0.1" value="3.5">
+          </div>
+          <div class="ps">
+            <div class="ps-row"><span>Frais notaire</span><span class="val amber" id="im-notaireVal">8,0 %</span></div>
+            <input type="range" class="amber" id="im-notaire" min="2" max="12" step="0.5" value="8">
+          </div>
+          <div class="ps">
+            <div class="ps-row"><span>Frais agence</span><span class="val amber" id="im-agenceVal">4,0 %</span></div>
+            <input type="range" class="amber" id="im-agence" min="0" max="10" step="0.5" value="4">
+          </div>
+          <div class="ps">
+            <div class="ps-row"><span>Charges / an</span><span class="val orange" id="im-chargesVal">2 400 €</span></div>
+            <input type="range" class="orange" id="im-charges" min="0" max="12000" step="100" value="2400">
+          </div>
+          <div class="ps">
+            <div class="ps-row"><span>Taxe foncière / an</span><span class="val orange" id="im-taxeVal">1 200 €</span></div>
+            <input type="range" class="orange" id="im-taxe" min="0" max="6000" step="100" value="1200">
+          </div>
+          <div class="ps">
+            <div class="ps-row"><span>Assurance empr.</span><span class="val orange" id="im-assurVal">0,30 %</span></div>
+            <input type="range" class="orange" id="im-assur" min="0.05" max="1" step="0.05" value="0.30">
+          </div>
+          <div class="ps">
+            <div class="ps-row"><span>Revalorisation bien / an</span><span class="val teal" id="im-revalorVal">2,0 %</span></div>
+            <input type="range" class="teal" id="im-revalor" min="-2" max="8" step="0.5" value="2">
+          </div>
+        </div>
+
+        <!-- col B : PEA + projection -->
+        <div class="immo-col-sliders">
+          <div class="ps-head pea-col">📈 PEA / Projection</div>
+
+          <div class="ps">
+            <div class="ps-row"><span>Loyer mensuel</span><span class="val green" id="im-loyerVal">800 €</span></div>
+            <input type="range" class="green" id="im-loyer" min="0" max="3000" step="50" value="800">
+          </div>
+          <div class="ps">
+            <div class="ps-row"><span>Épargne PEA / mois</span><span class="val green" id="im-epargneVal">500 €</span></div>
+            <input type="range" class="green" id="im-epargne" min="0" max="3000" step="50" value="500">
+          </div>
+          <div class="ps">
+            <div class="ps-row"><span>Rendement PEA / an</span><span class="val green" id="im-peaRateVal">8,0 %</span></div>
+            <input type="range" class="green" id="im-peaRate" min="2" max="20" step="0.5" value="8">
+          </div>
+          <div class="ps">
+            <div class="ps-row"><span>Durée de projection</span><span class="val lav" id="im-horizonVal">25 ans</span></div>
+            <input type="range" class="lav" id="im-horizon" min="5" max="40" step="1" value="25">
+          </div>
+
+          <!-- Mini stats recap -->
+          <div class="ps-head immo-col" style="margin-top:12px">📊 Résumé</div>
+          <div class="mini-stats" id="imMiniStats"></div>
+        </div>
+
+      </div>
+
+      <!-- ── RIGHT : chart ── -->
+      <div class="immo-chart-col">
+        <div class="chart-top">
+          <span class="chart-title">Patrimoine net — Immobilier vs PEA</span>
+          <div class="legend">
+            <span><span class="dot" style="background:#c8922a"></span>Immo net</span>
+            <span><span class="dot" style="background:#2e6b4a"></span>PEA</span>
+            <span><span class="dot" style="background:#c44a4a"></span>Coût immo cumulé</span>
+          </div>
+        </div>
+        <canvas id="immoChart" role="img" aria-label="Comparaison immobilier PEA"></canvas>
+        <div class="edge-note" id="immoNote"></div>
+      </div>
+
     </div>
   </div>
 
@@ -421,6 +651,7 @@ function switchTab(name) {
   document.getElementById('tab-'+name).classList.add('active');
   event.currentTarget.classList.add('active');
   if (name === 'casino') { drawWheel(); buildProbaTable(); runSimulation(); }
+  if (name === 'immo')   { computeImmo(); }
 }
 
 /* ═══════════════════════════════════════════
@@ -488,6 +719,245 @@ function computePEA() {
 });
 
 computePEA();
+
+/* ═══════════════════════════════════════════
+   IMMOBILIER vs PEA SIMULATOR
+═══════════════════════════════════════════ */
+let immoChart;
+
+function getImmoParams() {
+  const prix     = +document.getElementById('im-prix').value;
+  const apport   = +document.getElementById('im-apport').value;
+  const duree    = +document.getElementById('im-duree').value;
+  const txCredit = +document.getElementById('im-txcredit').value / 100;
+  const notaire  = +document.getElementById('im-notaire').value / 100;
+  const agence   = +document.getElementById('im-agence').value / 100;
+  const charges  = +document.getElementById('im-charges').value;
+  const taxe     = +document.getElementById('im-taxe').value;
+  const assur    = +document.getElementById('im-assur').value / 100;
+  const revalor  = +document.getElementById('im-revalor').value / 100;
+  const loyer    = +document.getElementById('im-loyer').value;
+  const epargne  = +document.getElementById('im-epargne').value;
+  const peaRate  = +document.getElementById('im-peaRate').value / 100;
+  const horizon  = +document.getElementById('im-horizon').value;
+  return { prix, apport, duree, txCredit, notaire, agence, charges, taxe, assur, revalor, loyer, epargne, peaRate, horizon };
+}
+
+function computeImmo() {
+  const p = getImmoParams();
+
+  // ── Frais initiaux ──
+  const fraisNotaire = p.prix * p.notaire;
+  const fraisAgence  = p.prix * p.agence;
+  const capitalEmprunte = p.prix + fraisAgence - p.apport; // notaire payé en cash
+  const investissementInitial = p.apport + fraisNotaire;   // cash sorti au départ
+
+  // ── Mensualité crédit (amortissement constant) ──
+  const rm = p.txCredit / 12;
+  const nm = p.duree * 12;
+  let mensualiteCredit;
+  if (rm === 0) {
+    mensualiteCredit = capitalEmprunte / nm;
+  } else {
+    mensualiteCredit = capitalEmprunte * rm * Math.pow(1+rm, nm) / (Math.pow(1+rm, nm) - 1);
+  }
+  // Assurance emprunteur mensuelle (sur capital initial)
+  const mensualiteAssur = capitalEmprunte * p.assur / 12;
+  const mensualiteTotal = mensualiteCredit + mensualiteAssur;
+
+  // ── Mensualité totale propriétaire ──
+  const mensualiteFull = mensualiteTotal + (p.charges + p.taxe) / 12;
+
+  // ── Logique PEA : versement manuel indépendant ──
+  // Le locataire paie son loyer ET verse p.epargne/mois dans le PEA (paramètre libre)
+  // L'apport + frais notaire sont investis dans le PEA dès le départ
+  const versementPEA = p.epargne;
+  const budgetMensuelLocataire = p.loyer + versementPEA;
+
+  // ── Simulation année par année ──
+  const rPea = p.peaRate / 12;
+  const horizon = p.horizon;
+  const labels = [];
+  const immoPNW = [];
+  const peaCapital = [];
+  const coutCumulImmo = [];
+
+  let dette = capitalEmprunte;
+  let pea = investissementInitial; // apport + frais notaire investis dès le départ
+  let coutTotal = investissementInitial;
+  let coutCumulLoyer = 0;
+
+  labels.push('An\u00a00');
+  immoPNW.push(Math.round(p.prix - dette));
+  peaCapital.push(Math.round(pea));
+  coutCumulImmo.push(Math.round(coutTotal));
+
+  let crossingYear = null;
+
+  for (let y = 1; y <= horizon; y++) {
+    const valeurBien = p.prix * Math.pow(1 + p.revalor, y);
+    for (let m = 0; m < 12; m++) {
+      if (dette > 0) {
+        const interetsMois = dette * rm;
+        const capitalRembourse = Math.min(mensualiteCredit - interetsMois, dette);
+        dette = Math.max(0, dette - capitalRembourse);
+        coutTotal += mensualiteTotal + (p.charges + p.taxe) / 12;
+      } else {
+        coutTotal += (p.charges + p.taxe) / 12;
+      }
+      // Locataire : loyer perdu + versement PEA capitalisé
+      coutCumulLoyer += p.loyer;
+      pea = pea * (1 + rPea) + versementPEA;
+    }
+    const nw = Math.round(valeurBien - Math.max(0, dette));
+    immoPNW.push(nw);
+    peaCapital.push(Math.round(pea));
+    coutCumulImmo.push(Math.round(coutTotal));
+    labels.push('An\u00a0' + y);
+    if (crossingYear === null && nw > Math.round(pea)) crossingYear = y;
+  }
+
+  // ── Mini stats ──
+  const pnwFinal = immoPNW[horizon];
+  const peaFinal = peaCapital[horizon];
+  const interetsTotaux = mensualiteCredit * nm - capitalEmprunte;
+  const loyers_cumules = p.loyer * horizon * 12;
+
+  document.getElementById('imMiniStats').innerHTML = `
+    <div class="ms-row"><span class="ms-label">Mensualité crédit + assur.</span><span class="ms-val-immo">${fmtE(mensualiteTotal)}/mois</span></div>
+    <div class="ms-row"><span class="ms-label">+ charges + taxe foncière</span><span class="ms-val-immo">${fmtE(mensualiteFull)}/mois total</span></div>
+    <div class="ms-row"><span class="ms-label">Intérêts totaux crédit</span><span class="ms-val-immo">${fmtK(interetsTotaux)}</span></div>
+    <div class="ms-row"><span class="ms-label">Patrimoine immo (an ${horizon})</span><span class="ms-val-immo">${fmtK(pnwFinal)}</span></div>
+    <div class="ms-row"><span class="ms-label">Loyers cumulés perdus</span><span style="color:var(--red-txt);font-weight:600">${fmtK(loyers_cumules)}</span></div>
+    <div class="ms-row"><span class="ms-label">PEA (${fmtE(versementPEA)}/mois, an ${horizon})</span><span class="ms-val-pea">${fmtK(peaFinal)}</span></div>
+    <div class="ms-row"><span class="ms-label">Budget locataire/mois</span><span class="ms-val-pea">${fmtE(budgetMensuelLocataire)}</span></div>
+  `;
+
+  // ── Crossing banner ──
+  const banner = document.getElementById('imCrossingBanner');
+  if (crossingYear !== null) {
+    banner.className = 'crossing-banner show';
+    banner.innerHTML = `🏆 L'immobilier dépasse le PEA à l'<strong>année ${crossingYear}</strong> — le patrimoine net immo surpasse le capital PEA (même budget mensuel total).`;
+  } else if (pnwFinal > peaFinal) {
+    banner.className = 'crossing-banner show';
+    banner.innerHTML = `🏆 L'immobilier dépasse le PEA sur la période.`;
+  } else {
+    banner.className = 'crossing-banner show never';
+    banner.innerHTML = `📉 Sur ${horizon} ans avec un loyer de ${fmtE(p.loyer)}/mois, le PEA reste supérieur : <strong>${fmtK(peaFinal)}</strong> vs <strong>${fmtK(pnwFinal)}</strong> pour l'immo. Ajustez le loyer, la revalorisation ou la durée.`;
+  }
+
+  // ── Note ──
+  document.getElementById('immoNote').innerHTML =
+    `<strong>Propriétaire :</strong> crédit <b>${fmtE(mensualiteCredit)}</b> + assur. <b>${fmtE(mensualiteAssur)}</b> + charges <b>${fmtE((p.charges+p.taxe)/12)}</b> = <b>${fmtE(mensualiteFull)}/mois</b> &nbsp;·&nbsp;
+     <strong>Locataire :</strong> loyer <b style="color:var(--red-txt)">${fmtE(p.loyer)}</b> + PEA <b>${fmtE(versementPEA)}</b> = <b>${fmtE(budgetMensuelLocataire)}/mois</b>`;
+
+  // ── Chart ──
+  if (immoChart) {
+    immoChart.data.labels = labels;
+    immoChart.data.datasets[0].data = immoPNW;
+    immoChart.data.datasets[1].data = peaCapital;
+    immoChart.data.datasets[2].data = coutCumulImmo;
+    immoChart.update();
+  } else {
+    immoChart = new Chart(document.getElementById('immoChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Patrimoine immo net',
+            data: immoPNW,
+            borderColor: '#c8922a',
+            backgroundColor: 'rgba(200,146,42,0.08)',
+            borderWidth: 2.5,
+            fill: false,
+            pointRadius: 3,
+            tension: .35
+          },
+          {
+            label: 'Capital PEA',
+            data: peaCapital,
+            borderColor: '#2e6b4a',
+            backgroundColor: 'rgba(46,107,74,0.08)',
+            borderWidth: 2.5,
+            fill: false,
+            pointRadius: 3,
+            tension: .35
+          },
+          {
+            label: 'Coût total sorti immo',
+            data: coutCumulImmo,
+            borderColor: '#c44a4a',
+            backgroundColor: 'rgba(196,74,74,0.05)',
+            borderWidth: 1.5,
+            borderDash: [5,4],
+            fill: false,
+            pointRadius: 0,
+            tension: .35
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 500, easing: 'easeOutBack' },
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#faf7f2', borderColor: '#e0d9ce', borderWidth: 1,
+            titleColor: '#2c2620', bodyColor: '#8a7e74', padding: 12,
+            callbacks: {
+              label: c => ' ' + c.dataset.label + ' : ' + Math.round(c.raw).toLocaleString('fr-FR') + ' €'
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#8a7e74', font: { family: 'DM Sans', size: 11 }, maxTicksLimit: 12 },
+            grid: { display: false }, border: { color: '#e0d9ce' }
+          },
+          y: {
+            ticks: {
+              color: '#8a7e74', font: { family: 'DM Sans', size: 11 },
+              callback: v => v >= 1e6 ? (v/1e6).toFixed(2) + ' M€' : (v/1000).toFixed(0) + 'k €'
+            },
+            grid: { color: '#ede8df' }, border: { display: false }
+          }
+        }
+      }
+    });
+  }
+
+}
+
+/* ── Immo sliders ── */
+[
+  {id:'im-prix',     out:'im-prixVal',     fmt: v => Math.round(v).toLocaleString('fr-FR') + '\u202f€'},
+  {id:'im-apport',   out:'im-apportVal',   fmt: v => Math.round(v).toLocaleString('fr-FR') + '\u202f€'},
+  {id:'im-duree',    out:'im-dureeVal',    fmt: v => v + ' ans'},
+  {id:'im-txcredit', out:'im-txcreditVal', fmt: v => parseFloat(v).toFixed(1).replace('.',',') + '\u202f%'},
+  {id:'im-notaire',  out:'im-notaireVal',  fmt: v => parseFloat(v).toFixed(1).replace('.',',') + '\u202f%'},
+  {id:'im-agence',   out:'im-agenceVal',   fmt: v => parseFloat(v).toFixed(1).replace('.',',') + '\u202f%'},
+  {id:'im-charges',  out:'im-chargesVal',  fmt: v => Math.round(v).toLocaleString('fr-FR') + '\u202f€'},
+  {id:'im-taxe',     out:'im-taxeVal',     fmt: v => Math.round(v).toLocaleString('fr-FR') + '\u202f€'},
+  {id:'im-assur',    out:'im-assurVal',    fmt: v => parseFloat(v).toFixed(2).replace('.',',') + '\u202f%'},
+  {id:'im-revalor',  out:'im-revalorVal',  fmt: v => parseFloat(v).toFixed(1).replace('.',',') + '\u202f%'},
+  {id:'im-loyer',    out:'im-loyerVal',    fmt: v => Math.round(v).toLocaleString('fr-FR') + '\u202f€'},
+  {id:'im-epargne',  out:'im-epargneVal',  fmt: v => Math.round(v).toLocaleString('fr-FR') + '\u202f€'},
+  {id:'im-peaRate',  out:'im-peaRateVal',  fmt: v => parseFloat(v).toFixed(1).replace('.',',') + '\u202f%'},
+  {id:'im-horizon',  out:'im-horizonVal',  fmt: v => v + ' ans'},
+].forEach(({id, out, fmt}) => {
+  const el = document.getElementById(id);
+  refreshSlider(el);
+  el.addEventListener('input', () => {
+    const vEl = document.getElementById(out);
+    vEl.textContent = fmt(el.value);
+    triggerBounce(vEl);
+    refreshSlider(el);
+    computeImmo();
+  });
+});
 
 /* ═══════════════════════════════════════════
    CASINO — ROULETTE DATA
