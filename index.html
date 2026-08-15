@@ -283,13 +283,20 @@ input[type=range].orange { background:linear-gradient(to right,var(--orange-txt)
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;              /* la note et le tableau passent sous la ligne de flottaison */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
 }
 
-.immo-chart-col canvas {
-  flex: 1;
-  min-height: 0;
-  width: 100% !important;
+/* Le graphe occupe toute la zone visible de la colonne ; la note et le tableau de bascule
+   passent sous la ligne de flottaison et se lisent en scrollant. Plancher à 360 px pour
+   qu'il reste lisible sur les petits écrans, quitte à scroller davantage. */
+/* Hauteur définie, comme .chart-wrap de l'onglet PEA : c'est la seule forme que Chart.js
+   mesure correctement. Avec height:auto + min-height il relit sa propre taille et reste
+   bloqué sur la plus grande jamais atteinte. */
+.immo-chart-box {
+  flex: 0 0 auto;
+  height: 520px;
 }
 
 /* compact slider row */
@@ -330,6 +337,31 @@ input[type=range].orange { background:linear-gradient(to right,var(--orange-txt)
 .ms-label { color: var(--muted); }
 .ms-val-immo { color: var(--amber-txt); font-weight: 600; }
 .ms-val-pea  { color: var(--green-txt); font-weight: 600; }
+
+.hyp { margin-top:10px; font-size:10.5px; line-height:1.6; color:var(--muted); }
+.hyp b { color:var(--text); font-weight:600; }
+
+/* ── Seuil de bascule, sous le graphe ── */
+.verdict { margin-top:8px; font-size:11px; }
+.verdict .v-lead { line-height:1.55; margin-bottom:6px; color:var(--text); }
+.verdict table { width:100%; border-collapse:collapse; table-layout:fixed; }
+.verdict th, .verdict td { padding:3px 4px; text-align:center; border-bottom:1px solid var(--border); font-weight:500; }
+.verdict tr:last-child td { border-bottom:none; }
+.verdict .v-lbl { text-align:left; color:var(--muted); font-size:10px; text-transform:uppercase;
+                  letter-spacing:.04em; white-space:nowrap; width:34%; }
+.verdict .v-seuil { color:var(--green-txt); font-weight:600; }
+.verdict .v-gap   { color:var(--muted); }
+.verdict .now { background:var(--amber-bg); color:var(--amber-txt); font-weight:700; }
+
+.ms-sub { font-size:9.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+          color:var(--muted); margin:9px 0 3px; padding-top:5px; border-top:1px solid var(--border); }
+.ms-sub:first-child { margin-top:0; padding-top:0; border-top:none; }
+
+/* résumé immo : compacté pour tenir sans scroll */
+#imMiniStats { font-size:11px; line-height:1.4; }
+#imMiniStats .ms-row { padding:1px 0; }
+#imMiniStats .ms-sub { margin:6px 0 2px; padding-top:3px; }
+#imHypotheses { font-size:9.5px; line-height:1.5; }
 
 .crossing-banner {
   margin-bottom: 8px; padding: 8px 16px; border-radius: 10px;
@@ -440,48 +472,54 @@ td.winner-pea  { color: var(--green-txt); }
 
     <div class="immo-layout">
 
-      <!-- ── LEFT : two columns of sliders ── -->
+      <!-- ── LEFT : sliders + résumé ── -->
       <div class="immo-params">
 
-        <!-- col A : immobilier -->
         <div class="immo-col-sliders">
-          <div class="ps-head immo-col">🏠 Immobilier</div>
+          <div class="ps-head pea-col">💰 Ma situation</div>
 
           <div class="ps">
-            <div class="ps-row"><span>Prix du bien</span><span class="val amber" id="im-prixVal">200 000 €</span></div>
-            <input type="range" class="amber" id="im-prix" min="50000" max="1000000" step="5000" value="200000">
+            <div class="ps-row"><span>Mon PEA aujourd'hui</span><span class="val green" id="im-peaActuelVal">150 000 €</span></div>
+            <input type="range" class="green" id="im-peaActuel" min="0" max="600000" step="5000" value="150000">
           </div>
           <div class="ps">
-            <div class="ps-row"><span>Apport</span><span class="val amber" id="im-apportVal">20 000 €</span></div>
-            <input type="range" class="amber" id="im-apport" min="0" max="200000" step="1000" value="20000">
+            <div class="ps-row"><span>Salaire net / mois</span><span class="val lav" id="im-salaireVal">3 000 €</span></div>
+            <input type="range" class="lav" id="im-salaire" min="1000" max="10000" step="100" value="3000">
           </div>
           <div class="ps">
-            <div class="ps-row"><span>Durée crédit</span><span class="val amber" id="im-dureeVal">20 ans</span></div>
-            <input type="range" class="amber" id="im-duree" min="5" max="30" step="1" value="20">
+            <div class="ps-row"><span>Dépenses courantes / mois</span><span class="val orange" id="im-depensesVal">1 000 €</span></div>
+            <input type="range" class="orange" id="im-depenses" min="0" max="5000" step="50" value="1000">
+          </div>
+          <div class="ps">
+            <div class="ps-row"><span>Mon loyer actuel / mois</span><span class="val green" id="im-loyerVal">900 €</span></div>
+            <input type="range" class="green" id="im-loyer" min="0" max="4000" step="50" value="900">
+          </div>
+          <div class="ps">
+            <div class="ps-row"><span>Rendement PEA / an</span><span class="val green" id="im-peaRateVal">7,0 %</span></div>
+            <input type="range" class="green" id="im-peaRate" min="0" max="15" step="0.5" value="7">
+          </div>
+          <div class="ps">
+            <div class="ps-row"><span>Durée de projection</span><span class="val lav" id="im-horizonVal">25 ans</span></div>
+            <input type="range" class="lav" id="im-horizon" min="5" max="40" step="1" value="25">
+          </div>
+
+          <div class="ps-head immo-col" style="margin-top:14px">🏠 Si j'achète</div>
+
+          <div class="ps">
+            <div class="ps-row"><span>Apport retiré du PEA</span><span class="val amber" id="im-apportVal">150 000 €</span></div>
+            <input type="range" class="amber" id="im-apport" min="0" max="150000" step="5000" value="150000">
+          </div>
+          <div class="ps">
+            <div class="ps-row"><span>Prix du bien</span><span class="val amber" id="im-prixVal">280 000 €</span></div>
+            <input type="range" class="amber" id="im-prix" min="100000" max="1200000" step="10000" value="280000">
           </div>
           <div class="ps">
             <div class="ps-row"><span>Taux crédit</span><span class="val amber" id="im-txcreditVal">3,5 %</span></div>
             <input type="range" class="amber" id="im-txcredit" min="0.5" max="8" step="0.1" value="3.5">
           </div>
           <div class="ps">
-            <div class="ps-row"><span>Frais notaire</span><span class="val amber" id="im-notaireVal">8,0 %</span></div>
-            <input type="range" class="amber" id="im-notaire" min="2" max="12" step="0.5" value="8">
-          </div>
-          <div class="ps">
-            <div class="ps-row"><span>Frais agence</span><span class="val amber" id="im-agenceVal">4,0 %</span></div>
-            <input type="range" class="amber" id="im-agence" min="0" max="10" step="0.5" value="4">
-          </div>
-          <div class="ps">
-            <div class="ps-row"><span>Charges / an</span><span class="val orange" id="im-chargesVal">2 400 €</span></div>
-            <input type="range" class="orange" id="im-charges" min="0" max="12000" step="100" value="2400">
-          </div>
-          <div class="ps">
-            <div class="ps-row"><span>Taxe foncière / an</span><span class="val orange" id="im-taxeVal">1 200 €</span></div>
-            <input type="range" class="orange" id="im-taxe" min="0" max="6000" step="100" value="1200">
-          </div>
-          <div class="ps">
-            <div class="ps-row"><span>Assurance empr.</span><span class="val orange" id="im-assurVal">0,30 %</span></div>
-            <input type="range" class="orange" id="im-assur" min="0.05" max="1" step="0.05" value="0.30">
+            <div class="ps-row"><span>Durée crédit</span><span class="val amber" id="im-dureeVal">20 ans</span></div>
+            <input type="range" class="amber" id="im-duree" min="5" max="30" step="1" value="20">
           </div>
           <div class="ps">
             <div class="ps-row"><span>Revalorisation bien / an</span><span class="val teal" id="im-revalorVal">2,0 %</span></div>
@@ -489,30 +527,10 @@ td.winner-pea  { color: var(--green-txt); }
           </div>
         </div>
 
-        <!-- col B : PEA + projection -->
         <div class="immo-col-sliders">
-          <div class="ps-head pea-col">📈 PEA / Projection</div>
-
-          <div class="ps">
-            <div class="ps-row"><span>Loyer mensuel</span><span class="val green" id="im-loyerVal">800 €</span></div>
-            <input type="range" class="green" id="im-loyer" min="0" max="3000" step="50" value="800">
-          </div>
-          <div class="ps">
-            <div class="ps-row"><span>Épargne PEA / mois</span><span class="val green" id="im-epargneVal">500 €</span></div>
-            <input type="range" class="green" id="im-epargne" min="0" max="3000" step="50" value="500">
-          </div>
-          <div class="ps">
-            <div class="ps-row"><span>Rendement PEA / an</span><span class="val green" id="im-peaRateVal">8,0 %</span></div>
-            <input type="range" class="green" id="im-peaRate" min="2" max="20" step="0.5" value="8">
-          </div>
-          <div class="ps">
-            <div class="ps-row"><span>Durée de projection</span><span class="val lav" id="im-horizonVal">25 ans</span></div>
-            <input type="range" class="lav" id="im-horizon" min="5" max="40" step="1" value="25">
-          </div>
-
-          <!-- Mini stats recap -->
-          <div class="ps-head immo-col" style="margin-top:12px">📊 Résumé</div>
+          <div class="ps-head immo-col">📊 Résumé</div>
           <div class="mini-stats" id="imMiniStats"></div>
+          <div class="hyp" id="imHypotheses"></div>
         </div>
 
       </div>
@@ -520,15 +538,16 @@ td.winner-pea  { color: var(--green-txt); }
       <!-- ── RIGHT : chart ── -->
       <div class="immo-chart-col">
         <div class="chart-top">
-          <span class="chart-title">Patrimoine net — Immobilier vs PEA</span>
+          <span class="chart-title">Patrimoine net — Achat (+ PEA) vs Location (+ PEA)</span>
           <div class="legend">
-            <span><span class="dot" style="background:#c8922a"></span>Immo net</span>
-            <span><span class="dot" style="background:#2e6b4a"></span>PEA</span>
-            <span><span class="dot" style="background:#c44a4a"></span>Coût immo cumulé</span>
+            <span><span class="dot" style="background:#c8922a"></span>Propriétaire total</span>
+            <span><span class="dot" style="background:#2e6b4a"></span>Locataire (PEA)</span>
+            <span><span class="dot" style="background:#b8985c"></span>dont bien net</span>
           </div>
         </div>
-        <canvas id="immoChart" role="img" aria-label="Comparaison immobilier PEA"></canvas>
+        <div class="chart-wrap immo-chart-box"><canvas id="immoChart" role="img" aria-label="Comparaison immobilier PEA"></canvas></div>
         <div class="edge-note" id="immoNote"></div>
+        <div class="verdict" id="immoVerdict"></div>
       </div>
 
     </div>
@@ -624,7 +643,8 @@ const fmtPct = v => v.toFixed(2).replace('.',',') + '\u202f%';
 function triggerBounce(el) { el.classList.remove('bounce'); void el.offsetWidth; el.classList.add('bounce'); }
 
 function refreshSlider(el) {
-  const pct = ((+el.value - +el.min) / (+el.max - +el.min) * 100).toFixed(2) + '%';
+  const span = +el.max - +el.min;   // span nul possible : le max de l'apport suit le PEA
+  const pct = (span > 0 ? (+el.value - +el.min) / span * 100 : 0).toFixed(2) + '%';
   el.style.setProperty('--p', pct);
 }
 
@@ -725,138 +745,240 @@ computePEA();
 ═══════════════════════════════════════════ */
 let immoChart;
 
+/* Hypothèses fixes — affichées sous le résumé, volontairement non réglables
+   pour garder le simulateur à 9 curseurs. */
+/* Hypothèses fixes — affichées sous le résumé, volontairement non réglables
+   pour garder le simulateur à 10 curseurs. */
+const IM_FRAIS    = 0.10;   // frais d'acquisition (notaire + agence), % du prix
+const IM_CHARGES  = 0.012;  // charges de copro + taxe foncière, % du prix / an
+const IM_ASSUR    = 0.003;  // assurance emprunteur, % du capital emprunté / an
+const IM_ENDETMAX = 0.35;   // taux d'endettement max admis par les banques (HCSF)
+
 function getImmoParams() {
-  const prix     = +document.getElementById('im-prix').value;
-  const apport   = +document.getElementById('im-apport').value;
-  const duree    = +document.getElementById('im-duree').value;
-  const txCredit = +document.getElementById('im-txcredit').value / 100;
-  const notaire  = +document.getElementById('im-notaire').value / 100;
-  const agence   = +document.getElementById('im-agence').value / 100;
-  const charges  = +document.getElementById('im-charges').value;
-  const taxe     = +document.getElementById('im-taxe').value;
-  const assur    = +document.getElementById('im-assur').value / 100;
-  const revalor  = +document.getElementById('im-revalor').value / 100;
-  const loyer    = +document.getElementById('im-loyer').value;
-  const epargne  = +document.getElementById('im-epargne').value;
-  const peaRate  = +document.getElementById('im-peaRate').value / 100;
-  const horizon  = +document.getElementById('im-horizon').value;
-  return { prix, apport, duree, txCredit, notaire, agence, charges, taxe, assur, revalor, loyer, epargne, peaRate, horizon };
+  const peaActuel = +document.getElementById('im-peaActuel').value;
+  const apportVer = +document.getElementById('im-apport').value;   // part du PEA retirée pour l'achat
+  const salaire   = +document.getElementById('im-salaire').value;
+  const depenses  = +document.getElementById('im-depenses').value;
+  const loyer     = +document.getElementById('im-loyer').value;
+  const peaRate   = +document.getElementById('im-peaRate').value / 100;
+  const horizon   = +document.getElementById('im-horizon').value;
+  const prix      = +document.getElementById('im-prix').value;
+  const txCredit  = +document.getElementById('im-txcredit').value / 100;
+  const duree     = +document.getElementById('im-duree').value;
+  const revalor   = +document.getElementById('im-revalor').value / 100;
+  return { peaActuel, apportVer, salaire, depenses, loyer, peaRate, horizon, prix, txCredit, duree, revalor };
+}
+
+/* Déroule les deux scénarios mois par mois. Le rendement PEA et la revalorisation sont
+   passés en argument : computeImmo les prend au curseur, seuilPEA les fait varier. */
+function simulerImmo(p, ctx, peaRate, revalor) {
+  const rPea = peaRate / 12;
+  const labels = [], proprioNW = [], bienNet = [], locataireNW = [];
+
+  let dette  = ctx.capitalEmprunte;
+  let peaPro = ctx.peaRestantAchat;
+  let peaLoc = p.peaActuel;
+  let moisRestants = ctx.capitalEmprunte > 0 ? ctx.nm : 0;
+
+  labels.push('An 0');
+  bienNet.push(Math.round(p.prix - dette));
+  proprioNW.push(Math.round(p.prix - dette + peaPro));
+  locataireNW.push(Math.round(peaLoc));
+
+  let crossingYear = null;
+
+  for (let y = 1; y <= p.horizon; y++) {
+    const valeurBien = p.prix * Math.pow(1 + revalor, y);
+    for (let m = 0; m < 12; m++) {
+      const enCredit = moisRestants > 0;
+      if (enCredit) {
+        const interetsMois = dette * ctx.rm;
+        dette = Math.max(0, dette - (ctx.mensualiteCredit - interetsMois));
+        moisRestants--;
+      }
+      // Crédit soldé : la mensualité libérée bascule automatiquement sur le PEA
+      peaPro = peaPro * (1 + rPea) + (enCredit ? ctx.investAchat : ctx.investApres);
+      peaLoc = peaLoc * (1 + rPea) + ctx.investLoc;
+    }
+    const bn    = Math.round(valeurBien - Math.max(0, dette));
+    const nwPro = Math.round(bn + peaPro);
+    const nwLoc = Math.round(peaLoc);
+    bienNet.push(bn);
+    proprioNW.push(nwPro);
+    locataireNW.push(nwLoc);
+    labels.push('An ' + y);
+    if (crossingYear === null && nwPro > nwLoc) crossingYear = y;
+  }
+  return { labels, proprioNW, bienNet, locataireNW, crossingYear };
+}
+
+/* Rendement PEA à partir duquel la location repasse devant, pour une revalorisation donnée.
+   Dichotomie : le patrimoine du locataire croît avec le rendement, celui du propriétaire
+   aussi mais bien plus lentement (seule son épargne résiduelle est placée). */
+const SEUIL_MAX = 0.25;
+function seuilPEA(p, ctx, revalor) {
+  const locGagne = r => {
+    const s = simulerImmo(p, ctx, r, revalor);
+    return s.locataireNW[p.horizon] > s.proprioNW[p.horizon];
+  };
+  if (locGagne(0)) return 0;                 // la location gagne même à rendement nul
+  if (!locGagne(SEUIL_MAX)) return Infinity; // l'achat gagne sur toute la plage testée
+  let lo = 0, hi = SEUIL_MAX;
+  for (let i = 0; i < 14; i++) {   // 0,25/2^14 ≈ 0,0015 pt : bien en deçà de l'affichage
+    const mid = (lo + hi) / 2;
+    if (locGagne(mid)) hi = mid; else lo = mid;
+  }
+  return (lo + hi) / 2;
 }
 
 function computeImmo() {
   const p = getImmoParams();
 
-  // ── Frais initiaux ──
-  const fraisNotaire = p.prix * p.notaire;
-  const fraisAgence  = p.prix * p.agence;
-  const capitalEmprunte = p.prix + fraisAgence - p.apport; // notaire payé en cash
-  const investissementInitial = p.apport + fraisNotaire;   // cash sorti au départ
+  // ── Achat : je retire une partie du PEA en apport, le reste continue à dormir ──
+  const fraisAcq        = p.prix * IM_FRAIS;
+  const besoinTotal     = p.prix + fraisAcq;
+  const apport          = Math.min(p.apportVer, p.peaActuel, besoinTotal);
+  const capitalEmprunte = besoinTotal - apport;
+  const peaRestantAchat = p.peaActuel - apport;   // ce qui reste investi malgré l'achat
 
-  // ── Mensualité crédit (amortissement constant) ──
+  // ── Coût logement du propriétaire ──
   const rm = p.txCredit / 12;
   const nm = p.duree * 12;
-  let mensualiteCredit;
-  if (rm === 0) {
-    mensualiteCredit = capitalEmprunte / nm;
-  } else {
-    mensualiteCredit = capitalEmprunte * rm * Math.pow(1+rm, nm) / (Math.pow(1+rm, nm) - 1);
-  }
-  // Assurance emprunteur mensuelle (sur capital initial)
-  const mensualiteAssur = capitalEmprunte * p.assur / 12;
-  const mensualiteTotal = mensualiteCredit + mensualiteAssur;
+  const coef = rm === 0 ? 1 / nm : rm * Math.pow(1+rm, nm) / (Math.pow(1+rm, nm) - 1);
+  const mensualiteCredit = capitalEmprunte * coef;
+  const mensualiteAssur  = capitalEmprunte * IM_ASSUR / 12;
+  const mensualiteBanque = mensualiteCredit + mensualiteAssur;   // ce que la banque regarde
+  const chargesMois      = p.prix * IM_CHARGES / 12;
+  const logementAchat    = mensualiteBanque + chargesMois;       // pendant le crédit
+  const logementApres    = chargesMois;                          // crédit soldé
 
-  // ── Mensualité totale propriétaire ──
-  const mensualiteFull = mensualiteTotal + (p.charges + p.taxe) / 12;
+  // ── Contrainte bancaire : 35 % de taux d'endettement max ──
+  const endettement   = p.salaire > 0 ? mensualiteBanque / p.salaire : 0;
+  const capitalMax    = p.salaire * IM_ENDETMAX / (coef + IM_ASSUR / 12);
+  const prixMax       = (capitalMax + apport) / (1 + IM_FRAIS);
+  const creditRefuse  = endettement > IM_ENDETMAX && capitalEmprunte > 0;
 
-  // ── Logique PEA : versement manuel indépendant ──
-  // Le locataire paie son loyer ET verse p.epargne/mois dans le PEA (paramètre libre)
-  // L'apport + frais notaire sont investis dans le PEA dès le départ
-  const versementPEA = p.epargne;
-  const budgetMensuelLocataire = p.loyer + versementPEA;
+  // ── Répartition du salaire : logement + dépenses courantes + le reste investi ──
+  const dispo         = p.salaire - p.depenses;
+  const investAchat   = Math.max(0, dispo - logementAchat);   // pendant le crédit
+  const investApres   = Math.max(0, dispo - logementApres);   // après le crédit
+  const investLoc     = Math.max(0, dispo - p.loyer);
+  const achatIntenable = dispo - logementAchat < 0;
+  const locIntenable   = dispo - p.loyer < 0;
 
-  // ── Simulation année par année ──
-  const rPea = p.peaRate / 12;
+  // ── Simulation mois par mois ──
+  // Tout ce dont simulerImmo a besoin, hors rendement PEA et revalorisation : ces deux-là
+  // restent des paramètres pour pouvoir rejouer la simulation et chercher le seuil de bascule.
+  const ctx = { capitalEmprunte, peaRestantAchat, nm, rm, mensualiteCredit,
+                investAchat, investApres, investLoc };
+
   const horizon = p.horizon;
-  const labels = [];
-  const immoPNW = [];
-  const peaCapital = [];
-  const coutCumulImmo = [];
+  const { labels, proprioNW, bienNet, locataireNW, crossingYear } =
+    simulerImmo(p, ctx, p.peaRate, p.revalor);
 
-  let dette = capitalEmprunte;
-  let pea = investissementInitial; // apport + frais notaire investis dès le départ
-  let coutTotal = investissementInitial;
-  let coutCumulLoyer = 0;
-
-  labels.push('An\u00a00');
-  immoPNW.push(Math.round(p.prix - dette));
-  peaCapital.push(Math.round(pea));
-  coutCumulImmo.push(Math.round(coutTotal));
-
-  let crossingYear = null;
-
-  for (let y = 1; y <= horizon; y++) {
-    const valeurBien = p.prix * Math.pow(1 + p.revalor, y);
-    for (let m = 0; m < 12; m++) {
-      if (dette > 0) {
-        const interetsMois = dette * rm;
-        const capitalRembourse = Math.min(mensualiteCredit - interetsMois, dette);
-        dette = Math.max(0, dette - capitalRembourse);
-        coutTotal += mensualiteTotal + (p.charges + p.taxe) / 12;
-      } else {
-        coutTotal += (p.charges + p.taxe) / 12;
-      }
-      // Locataire : loyer perdu + versement PEA capitalisé
-      coutCumulLoyer += p.loyer;
-      pea = pea * (1 + rPea) + versementPEA;
-    }
-    const nw = Math.round(valeurBien - Math.max(0, dette));
-    immoPNW.push(nw);
-    peaCapital.push(Math.round(pea));
-    coutCumulImmo.push(Math.round(coutTotal));
-    labels.push('An\u00a0' + y);
-    if (crossingYear === null && nw > Math.round(pea)) crossingYear = y;
-  }
-
-  // ── Mini stats ──
-  const pnwFinal = immoPNW[horizon];
-  const peaFinal = peaCapital[horizon];
-  const interetsTotaux = mensualiteCredit * nm - capitalEmprunte;
-  const loyers_cumules = p.loyer * horizon * 12;
+  // ── Résumé ──
+  const proFinal    = proprioNW[horizon];
+  const locFinal    = locataireNW[horizon];
+  const peaProFinal = proFinal - bienNet[horizon];
+  const ecart       = proFinal - locFinal;
+  const pct     = v => (v * 100).toFixed(1).replace('.', ',') + ' %';
+  const rougeSi = c => c ? ' style="color:var(--red-txt);font-weight:700"' : '';
 
   document.getElementById('imMiniStats').innerHTML = `
-    <div class="ms-row"><span class="ms-label">Mensualité crédit + assur.</span><span class="ms-val-immo">${fmtE(mensualiteTotal)}/mois</span></div>
-    <div class="ms-row"><span class="ms-label">+ charges + taxe foncière</span><span class="ms-val-immo">${fmtE(mensualiteFull)}/mois total</span></div>
-    <div class="ms-row"><span class="ms-label">Intérêts totaux crédit</span><span class="ms-val-immo">${fmtK(interetsTotaux)}</span></div>
-    <div class="ms-row"><span class="ms-label">Patrimoine immo (an ${horizon})</span><span class="ms-val-immo">${fmtK(pnwFinal)}</span></div>
-    <div class="ms-row"><span class="ms-label">Loyers cumulés perdus</span><span style="color:var(--red-txt);font-weight:600">${fmtK(loyers_cumules)}</span></div>
-    <div class="ms-row"><span class="ms-label">PEA (${fmtE(versementPEA)}/mois, an ${horizon})</span><span class="ms-val-pea">${fmtK(peaFinal)}</span></div>
-    <div class="ms-row"><span class="ms-label">Budget locataire/mois</span><span class="ms-val-pea">${fmtE(budgetMensuelLocataire)}</span></div>
+    <div class="ms-sub">🏦 Le crédit</div>
+    <div class="ms-row"><span class="ms-label">Apport retiré du PEA</span><span class="ms-val-immo">${fmtK(apport)}</span></div>
+    <div class="ms-row"><span class="ms-label">→ reste investi sur PEA</span><span class="ms-val-pea">${fmtK(peaRestantAchat)}</span></div>
+    <div class="ms-row"><span class="ms-label">Montant emprunté</span><span class="ms-val-immo">${fmtK(capitalEmprunte)}</span></div>
+    <div class="ms-row"><span class="ms-label">Mensualité banque</span><span class="ms-val-immo">${fmtE(mensualiteBanque)}/mois</span></div>
+    <div class="ms-row"><span class="ms-label">Taux d'endettement</span><span class="ms-val-immo"${rougeSi(creditRefuse)}>${pct(endettement)} ${creditRefuse ? '⚠' : '✓'}</span></div>
+    <div class="ms-row"><span class="ms-label">Prix max finançable</span><span class="ms-val-immo">${fmtK(prixMax)}</span></div>
+
+    <div class="ms-sub">💸 Mes ${fmtE(p.salaire)}/mois — si j'achète</div>
+    <div class="ms-row"><span class="ms-label">Logement (crédit + charges)</span><span class="ms-val-immo"${rougeSi(achatIntenable)}>${fmtE(logementAchat)}</span></div>
+    <div class="ms-row"><span class="ms-label">Dépenses courantes</span><span style="color:var(--orange-txt);font-weight:600">${fmtE(p.depenses)}</span></div>
+    <div class="ms-row"><span class="ms-label">Investi sur PEA</span><span class="ms-val-pea">${fmtE(investAchat)}</span></div>
+    <div class="ms-row"><span class="ms-label">→ après le crédit (an ${p.duree})</span><span class="ms-val-pea">${fmtE(investApres)}</span></div>
+
+    <div class="ms-sub">💸 Mes ${fmtE(p.salaire)}/mois — si je loue</div>
+    <div class="ms-row"><span class="ms-label">Loyer</span><span style="color:var(--red-txt);font-weight:600"${rougeSi(locIntenable)}>${fmtE(p.loyer)}</span></div>
+    <div class="ms-row"><span class="ms-label">Dépenses courantes</span><span style="color:var(--orange-txt);font-weight:600">${fmtE(p.depenses)}</span></div>
+    <div class="ms-row"><span class="ms-label">Investi sur PEA</span><span class="ms-val-pea">${fmtE(investLoc)}</span></div>
+
+    <div class="ms-sub">📈 À l'an ${horizon}</div>
+    <div class="ms-row"><span class="ms-label">Bien net</span><span class="ms-val-immo">${fmtK(bienNet[horizon])}</span></div>
+    <div class="ms-row"><span class="ms-label">+ PEA reconstitué</span><span class="ms-val-pea">${fmtK(peaProFinal)}</span></div>
+    <div class="ms-row"><span class="ms-label"><b>Total si j'achète</b></span><span class="ms-val-immo">${fmtK(proFinal)}</span></div>
+    <div class="ms-row"><span class="ms-label"><b>Total si je loue</b></span><span class="ms-val-pea">${fmtK(locFinal)}</span></div>
+    <div class="ms-row"><span class="ms-label">Écart</span><span style="color:${ecart >= 0 ? 'var(--amber-txt)' : 'var(--green-txt)'};font-weight:700">${ecart >= 0 ? '+' : '−'}${fmtK(Math.abs(ecart))}</span></div>
   `;
 
-  // ── Crossing banner ──
+  document.getElementById('imHypotheses').innerHTML =
+    `Hypothèses fixes : frais d'acquisition <b>10 %</b> · charges + taxe foncière <b>1,2 %</b> du prix/an ·
+     assurance emprunteur <b>0,30 %</b>/an · endettement bancaire plafonné à <b>35 %</b> du salaire net ·
+     salaire, loyer et dépenses constants (hors inflation) · retrait du PEA affiché <b>brut</b>
+     (les 17,2 % de prélèvements sociaux sur les gains ne sont pas déduits).`;
+
+  // ── Bandeau ──
   const banner = document.getElementById('imCrossingBanner');
-  if (crossingYear !== null) {
+  if (creditRefuse) {
+    banner.className = 'crossing-banner show never';
+    banner.innerHTML = `🚫 Crédit hors des clous : <strong>${fmtE(mensualiteBanque)}/mois</strong>, soit <strong>${pct(endettement)}</strong> de ${fmtE(p.salaire)} net (plafond bancaire 35 %). Avec ${fmtK(apport)} d'apport, votre plafond est d'environ <strong>${fmtK(prixMax)}</strong>.`;
+  } else if (achatIntenable) {
+    banner.className = 'crossing-banner show never';
+    banner.innerHTML = `⚠️ Reste à vivre négatif : le logement coûte <strong>${fmtE(logementAchat)}/mois</strong> alors qu'il ne reste que <strong>${fmtE(dispo)}</strong> après vos dépenses courantes.`;
+  } else if (crossingYear !== null) {
     banner.className = 'crossing-banner show';
-    banner.innerHTML = `🏆 L'immobilier dépasse le PEA à l'<strong>année ${crossingYear}</strong> — le patrimoine net immo surpasse le capital PEA (même budget mensuel total).`;
-  } else if (pnwFinal > peaFinal) {
-    banner.className = 'crossing-banner show';
-    banner.innerHTML = `🏆 L'immobilier dépasse le PEA sur la période.`;
+    banner.innerHTML = `🏆 L'achat passe devant dès l'<strong>année ${crossingYear}</strong>. À l'an ${horizon} : <strong>${fmtK(proFinal)}</strong> en achetant vs <strong>${fmtK(locFinal)}</strong> en restant locataire (${ecart >= 0 ? '+' : '−'}${fmtK(Math.abs(ecart))}).`;
   } else {
     banner.className = 'crossing-banner show never';
-    banner.innerHTML = `📉 Sur ${horizon} ans avec un loyer de ${fmtE(p.loyer)}/mois, le PEA reste supérieur : <strong>${fmtK(peaFinal)}</strong> vs <strong>${fmtK(pnwFinal)}</strong> pour l'immo. Ajustez le loyer, la revalorisation ou la durée.`;
+    banner.innerHTML = `📉 Sur ${horizon} ans, laisser les ${fmtK(p.peaActuel)} sur le PEA reste devant : <strong>${fmtK(locFinal)}</strong> en louant vs <strong>${fmtK(proFinal)}</strong> en achetant. Testez un rendement PEA plus bas ou une revalorisation du bien plus forte.`;
   }
 
-  // ── Note ──
+  // ── Note sous le graphe ──
   document.getElementById('immoNote').innerHTML =
-    `<strong>Propriétaire :</strong> crédit <b>${fmtE(mensualiteCredit)}</b> + assur. <b>${fmtE(mensualiteAssur)}</b> + charges <b>${fmtE((p.charges+p.taxe)/12)}</b> = <b>${fmtE(mensualiteFull)}/mois</b> &nbsp;·&nbsp;
-     <strong>Locataire :</strong> loyer <b style="color:var(--red-txt)">${fmtE(p.loyer)}</b> + PEA <b>${fmtE(versementPEA)}</b> = <b>${fmtE(budgetMensuelLocataire)}/mois</b>`;
+    `<strong>J'achète :</strong> je retire <b>${fmtK(apport)}</b> du PEA (il en reste <b style="color:var(--green-txt)">${fmtK(peaRestantAchat)}</b>) + <b>${fmtK(capitalEmprunte)}</b> empruntés sur ${p.duree} ans → logement <b>${fmtE(logementAchat)}</b> + courant <b>${fmtE(p.depenses)}</b> + PEA <b style="color:var(--green-txt)">${fmtE(investAchat)}</b>/mois &nbsp;·&nbsp;
+     <strong>Je loue :</strong> loyer <b style="color:var(--red-txt)">${fmtE(p.loyer)}</b> + courant <b>${fmtE(p.depenses)}</b> + PEA <b style="color:var(--green-txt)">${fmtE(investLoc)}</b>, PEA gardé à ${fmtK(p.peaActuel)}`;
+
+  // ── Seuil de bascule : combien de points le PEA doit garder d'avance sur l'immobilier ──
+  const pts = v => v.toFixed(1).replace('.', ',') + ' pts';
+  const fmtSeuil = s => s === Infinity ? '—' : pct(s);
+  const REVALS = [0, 0.01, 0.02, 0.03, 0.04, 0.05];
+  const seuils = REVALS.map(r => seuilPEA(p, ctx, r));
+  const colNow = REVALS.findIndex(r => Math.abs(r - p.revalor) < 0.0001);
+  const cls = i => i === colNow ? ' class="now"' : '';
+
+  const seuilNow  = seuilPEA(p, ctx, p.revalor);
+  const ecartNow  = seuilNow - p.revalor;
+  const margeNow  = p.peaRate - seuilNow;
+  let lead;
+  if (seuilNow === Infinity) {
+    lead = `Avec un bien à <b>${pct(p.revalor)}</b>/an, l'achat gagne quel que soit le rendement du PEA : le levier du crédit ne se rattrape pas.`;
+  } else if (seuilNow <= 0) {
+    lead = `Avec un bien à <b>${pct(p.revalor)}</b>/an, la location gagne même à rendement PEA nul.`;
+  } else {
+    lead = `Avec un bien à <b>${pct(p.revalor)}</b>/an, la bascule est à <b style="color:var(--green-txt)">${pct(seuilNow)}</b> de rendement PEA,
+            soit <b>${pts(ecartNow * 100)}</b> d'écart à maintenir. Vous êtes à <b>${pct(p.peaRate)}</b> →
+            ${Math.abs(margeNow * 100) < 0.1
+              ? `<b>les deux scénarios se valent</b> à ce réglage.`
+              : margeNow > 0
+                ? `<b style="color:var(--green-txt)">la location l'emporte</b> avec ${pts(margeNow * 100)} de marge.`
+                : `<b style="color:var(--amber-txt)">l'achat l'emporte</b>, il manque ${pts(-margeNow * 100)} au PEA.`}`;
+  }
+
+  document.getElementById('immoVerdict').innerHTML = `
+    <div class="v-lead">${lead}</div>
+    <table>
+      <tr><td class="v-lbl">Si l'immobilier fait</td>${REVALS.map((r,i) => `<td${cls(i)}>${pct(r)}/an</td>`).join('')}</tr>
+      <tr><td class="v-lbl">il faut un PEA à</td>${seuils.map((s,i) => `<td class="v-seuil${i === colNow ? ' now' : ''}">${fmtSeuil(s)}</td>`).join('')}</tr>
+      <tr><td class="v-lbl">soit un écart de</td>${seuils.map((s,i) => `<td class="v-gap${i === colNow ? ' now' : ''}">${s === Infinity ? '—' : pts((s - REVALS[i]) * 100)}</td>`).join('')}</tr>
+    </table>`;
 
   // ── Chart ──
   if (immoChart) {
     immoChart.data.labels = labels;
-    immoChart.data.datasets[0].data = immoPNW;
-    immoChart.data.datasets[1].data = peaCapital;
-    immoChart.data.datasets[2].data = coutCumulImmo;
+    immoChart.data.datasets[0].data = proprioNW;
+    immoChart.data.datasets[1].data = locataireNW;
+    immoChart.data.datasets[2].data = bienNet;
     immoChart.update();
   } else {
     immoChart = new Chart(document.getElementById('immoChart'), {
@@ -865,8 +987,8 @@ function computeImmo() {
         labels,
         datasets: [
           {
-            label: 'Patrimoine immo net',
-            data: immoPNW,
+            label: 'Propriétaire (bien net + PEA)',
+            data: proprioNW,
             borderColor: '#c8922a',
             backgroundColor: 'rgba(200,146,42,0.08)',
             borderWidth: 2.5,
@@ -875,8 +997,8 @@ function computeImmo() {
             tension: .35
           },
           {
-            label: 'Capital PEA',
-            data: peaCapital,
+            label: 'Locataire (PEA)',
+            data: locataireNW,
             borderColor: '#2e6b4a',
             backgroundColor: 'rgba(46,107,74,0.08)',
             borderWidth: 2.5,
@@ -885,10 +1007,10 @@ function computeImmo() {
             tension: .35
           },
           {
-            label: 'Coût total sorti immo',
-            data: coutCumulImmo,
-            borderColor: '#c44a4a',
-            backgroundColor: 'rgba(196,74,74,0.05)',
+            label: 'dont bien net seul',
+            data: bienNet,
+            borderColor: '#b8985c',
+            backgroundColor: 'rgba(184,152,92,0.05)',
             borderWidth: 1.5,
             borderDash: [5,4],
             fill: false,
@@ -933,20 +1055,17 @@ function computeImmo() {
 
 /* ── Immo sliders ── */
 [
-  {id:'im-prix',     out:'im-prixVal',     fmt: v => Math.round(v).toLocaleString('fr-FR') + '\u202f€'},
-  {id:'im-apport',   out:'im-apportVal',   fmt: v => Math.round(v).toLocaleString('fr-FR') + '\u202f€'},
-  {id:'im-duree',    out:'im-dureeVal',    fmt: v => v + ' ans'},
-  {id:'im-txcredit', out:'im-txcreditVal', fmt: v => parseFloat(v).toFixed(1).replace('.',',') + '\u202f%'},
-  {id:'im-notaire',  out:'im-notaireVal',  fmt: v => parseFloat(v).toFixed(1).replace('.',',') + '\u202f%'},
-  {id:'im-agence',   out:'im-agenceVal',   fmt: v => parseFloat(v).toFixed(1).replace('.',',') + '\u202f%'},
-  {id:'im-charges',  out:'im-chargesVal',  fmt: v => Math.round(v).toLocaleString('fr-FR') + '\u202f€'},
-  {id:'im-taxe',     out:'im-taxeVal',     fmt: v => Math.round(v).toLocaleString('fr-FR') + '\u202f€'},
-  {id:'im-assur',    out:'im-assurVal',    fmt: v => parseFloat(v).toFixed(2).replace('.',',') + '\u202f%'},
-  {id:'im-revalor',  out:'im-revalorVal',  fmt: v => parseFloat(v).toFixed(1).replace('.',',') + '\u202f%'},
-  {id:'im-loyer',    out:'im-loyerVal',    fmt: v => Math.round(v).toLocaleString('fr-FR') + '\u202f€'},
-  {id:'im-epargne',  out:'im-epargneVal',  fmt: v => Math.round(v).toLocaleString('fr-FR') + '\u202f€'},
-  {id:'im-peaRate',  out:'im-peaRateVal',  fmt: v => parseFloat(v).toFixed(1).replace('.',',') + '\u202f%'},
-  {id:'im-horizon',  out:'im-horizonVal',  fmt: v => v + ' ans'},
+  {id:'im-peaActuel', out:'im-peaActuelVal', fmt: v => Math.round(v).toLocaleString('fr-FR') + ' €'},
+  {id:'im-apport',    out:'im-apportVal',    fmt: v => Math.round(v).toLocaleString('fr-FR') + ' €'},
+  {id:'im-salaire',   out:'im-salaireVal',   fmt: v => Math.round(v).toLocaleString('fr-FR') + ' €'},
+  {id:'im-depenses',  out:'im-depensesVal',  fmt: v => Math.round(v).toLocaleString('fr-FR') + ' €'},
+  {id:'im-loyer',     out:'im-loyerVal',     fmt: v => Math.round(v).toLocaleString('fr-FR') + ' €'},
+  {id:'im-peaRate',   out:'im-peaRateVal',   fmt: v => parseFloat(v).toFixed(1).replace('.',',') + ' %'},
+  {id:'im-horizon',   out:'im-horizonVal',   fmt: v => v + ' ans'},
+  {id:'im-prix',      out:'im-prixVal',      fmt: v => Math.round(v).toLocaleString('fr-FR') + ' €'},
+  {id:'im-txcredit',  out:'im-txcreditVal',  fmt: v => parseFloat(v).toFixed(1).replace('.',',') + ' %'},
+  {id:'im-duree',     out:'im-dureeVal',     fmt: v => v + ' ans'},
+  {id:'im-revalor',   out:'im-revalorVal',   fmt: v => parseFloat(v).toFixed(1).replace('.',',') + ' %'},
 ].forEach(({id, out, fmt}) => {
   const el = document.getElementById(id);
   refreshSlider(el);
@@ -955,9 +1074,22 @@ function computeImmo() {
     vEl.textContent = fmt(el.value);
     triggerBounce(vEl);
     refreshSlider(el);
+    if (id === 'im-peaActuel') syncApportMax();   // on ne peut pas retirer plus que ce qu'on a
     computeImmo();
   });
 });
+
+/* L'apport ne peut pas dépasser le PEA : son max suit le curseur du PEA. */
+function syncApportMax() {
+  const pea = +document.getElementById('im-peaActuel').value;
+  const el  = document.getElementById('im-apport');
+  el.max = pea;
+  if (+el.value > pea) el.value = pea;
+  document.getElementById('im-apportVal').textContent =
+    Math.round(+el.value).toLocaleString('fr-FR') + ' €';
+  refreshSlider(el);
+}
+syncApportMax();
 
 /* ═══════════════════════════════════════════
    CASINO — ROULETTE DATA
